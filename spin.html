@@ -1,7 +1,26 @@
-<div class="spinKit">
-  <div class="sk-three-bounce" v-show="spin">
-  <div class="sk-child sk-bounce1"></div>
-  <div class="sk-child sk-bounce2"></div>
-  <div class="sk-child sk-bounce3"></div>
-  </div>  
+<div id="spin">
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <div v-show="show">
+          <div class="spinKit">
+            <div class="sk-three-bounce">
+              <div class="sk-child sk-bounce1"></div>
+              <div class="sk-child sk-bounce2"></div>
+              <div class="sk-child sk-bounce3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
+<script>
+  var spin = new Vue({
+    el:'#spin',
+    data:{
+      show: false,
+    }
+  });
+</script>
