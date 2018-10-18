@@ -28,3 +28,11 @@ function _reemplaceStrSingleFile(docID, arr, regEx){
     fileBody.replaceText(mark, value);    
   }
 }
+
+function moveFileId(fileId, toFolderId) {
+   var file = DriveApp.getFileById(fileId);
+   var source_folder = DriveApp.getFileById(fileId).getParents().next();
+   var folder = DriveApp.getFolderById(toFolderId)
+   folder.addFile(file);
+   source_folder.removeFile(file);
+}
