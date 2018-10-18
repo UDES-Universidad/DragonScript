@@ -46,6 +46,24 @@ function _fecha(dateObj){
   return fecha;
 }
 
+//Regresa la hora
+
+function _horas(dateObj){
+  var date = dateObj ? dateObj : new Date();
+  var hours = Number(date.getHours()) < 10 ? '0' + date.getHours() : date.getHours();
+  var minutes = Number(date.getMinutes()) < 10 ? '0' + date.getMinutes() : date.getMinutes();
+  var seconds = Number(date.getSeconds()) < 10 ? '0' + date.getSeconds() : date.getSeconds();
+
+  var obj = {
+    hours: hours,
+    minutes: minutes,
+    seconds: seconds,
+    hm: hours + ':' + minutes,
+    full: hours + ':' + minutes + ':' + seconds,
+  }
+
+  return obj;
+}
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
