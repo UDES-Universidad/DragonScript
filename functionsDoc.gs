@@ -9,3 +9,22 @@ function _exportAsHTML(docID){
   var html = UrlFetchApp.fetch(url,param).getContentText();
   return html; 
 }
+
+//New  docfile from template
+function _fileNewFromTemplate(docID, nameNew){
+  var file= DriveApp.getFileById(docID);
+  var newFileID = file.makeCopy(nameNew).getId();
+  
+  return newFileID;
+}
+
+//Reemplace marcs
+function _reemplaceStrSingleFile(docID, arr, regEx){
+  var fileBody = DocumentApp.openById(docID).getBody();
+  
+  for(var i = 0; i < arr.length; i++){
+    var mark = regEx ? new RegExp(arr[i][0], "g") : arr[i][0];
+    var value = arr[i][1];
+    fileBody.replaceText(mark, value);    
+  }
+}
