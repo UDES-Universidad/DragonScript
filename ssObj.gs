@@ -5,6 +5,7 @@
 function _ss(id){
   //General:::::::::::::::::::::::::::::::::::::
   this.ss = id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActiveSpreadsheet();
+  this.id = this.ss.getId();
   this.sheet = '';
   this.values = '';
   this.setSheet = function(name){
