@@ -1,3 +1,5 @@
+// Ignore this aberretion, it is util for me.
+
 namespace DaTe {
 
     export let str: (character: string, date?: Date) => string = (character: string, date?: Date, ) => {

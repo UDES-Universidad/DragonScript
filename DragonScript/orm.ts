@@ -46,6 +46,7 @@ namespace ORM {
 
         constructor() {
             super();
+            this.setSheet();
             // this.table_constructor()
             // this.create_columns_directory();
         }
@@ -53,31 +54,33 @@ namespace ORM {
 
         table_constructor(): void {
             // Add new table if not exists, and add headers.
-            Logger.log(this.id);
-            Logger.log(this.sheet_name);
-            if (this.sheet_name && this.id) {
-                this.getSS();
-                let existSheet: boolean = false;
-                for (let sheet of this.sheets) {
-                    if (this.sheet_name === sheet.getName()) {
-                        existSheet = true;
-                        break;
+            if (this.id) {
+                if (this.sheet_name) {
+                    this.getSS();
+                    let existSheet: boolean = false;
+                    for (let sheet of this.sheets) {
+                        if (this.sheet_name === sheet.getName()) {
+                            existSheet = true;
+                            break;
+                        }
                     }
-                }
 
-                if (!existSheet) {
-                    this.insertSheet(this.sheet_name, false);
-                }
+                    if (!existSheet) {
+                        this.insertSheet(this.sheet_name, false);
+                    }
 
-                this.setSheet(this.sheet_name);
-                this.get_headers();
-                if (this.sheet_active) {
-                    this.sheet_active.getRange(1, 1, 1, this.column_headers_verbose.length).setValues([this.column_headers_verbose]);
+                    this.setSheet(this.sheet_name);
+                    this.get_headers();
+                    if (this.sheet_active) {
+                        this.sheet_active.getRange(1, 1, 1, this.column_headers_verbose.length).setValues([this.column_headers_verbose]);
+                    } else {
+                        throw new Error('There are not an Active Sheet.');
+                    }
                 } else {
-                    throw new Error('There are not an Active Sheet.');
+                    throw new Error('Add sheet_name');
                 }
             } else {
-                throw new Error('Add sheet_name and id in SS');
+                throw new Error('Add id of Spreadsheet');
             }
 
             this.create_columns_directory();

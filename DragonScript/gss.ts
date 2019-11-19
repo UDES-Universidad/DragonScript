@@ -53,7 +53,7 @@ namespace GSS {
         getSS() {
             this.ss = this.id ? SpreadsheetApp.openById(this.id) : SpreadsheetApp.getActiveSpreadsheet();
             this.url = this.ss.getUrl();
-            this.sheets = this.ss.getSheets;
+            this.sheets = <[]>this.ss.getSheets();
         }
 
         insertSheet(nameSheet: string, usethis: boolean = true) {
@@ -76,8 +76,10 @@ namespace GSS {
 
         setSheet(sheet?: string | number) {
             // Set sheet_active: get sheet_active and values from data range
-            if (!sheet) {
+            if (!sheet && this.sheet_name) {
                 sheet = this.sheet_name;
+            } else {
+                throw ("sheet_name is empty.");
             }
 
             if (typeof sheet.valueOf() === 'string') {
@@ -92,7 +94,6 @@ namespace GSS {
             } else {
                 this.sheet_active = this.sheets[sheet];
             }
-
         }
 
         values(): object | boolean {
