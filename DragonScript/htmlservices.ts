@@ -1,10 +1,24 @@
-namespace HTMLSERVISE {
+namespace HTMLPROCESORS {
 
-    export function include(filename: string) {
+    export function include(filename: string): string {
         return HtmlService.createHtmlOutputFromFile(filename)
             .getContent();
     }
 
+    export function statics(param: {}): string {
+
+        return '';
+    }
+
+    export function template(param: {}): string {
+
+        return '';
+    }
+
+    export function block(param: {}): string {
+
+        return '';
+    }
 
     type param_sidebar = {
         template: string,

@@ -6,4 +6,3 @@ package.json
 tsconfig.json
 /tests/*
 /deprecated_depot/*
-/example_app/*
