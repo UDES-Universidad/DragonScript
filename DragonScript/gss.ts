@@ -5,7 +5,7 @@ namespace GSS {
         id?: string,
         sheets: any;
         sheet_active: GoogleAppsScript.Spreadsheet.Sheet | undefined;
-        sheet_name: string;
+        sheet_name?: string;
         ss: GoogleAppsScript.Spreadsheet.Spreadsheet | undefined;
         url: string;
 
@@ -24,9 +24,11 @@ namespace GSS {
         url: string = '';
         sheets: any = [];
         sheet_active: GoogleAppsScript.Spreadsheet.Sheet | undefined = undefined;
-        sheet_name: string = '';
+        sheet_name?: string = '';
 
-        constructor() { }
+        constructor() {
+            this.getSS()
+        }
 
         copy(name: string, usethis: boolean = true): string | undefined {
             // Makes a document copy
@@ -52,6 +54,7 @@ namespace GSS {
 
         getSS() {
             this.ss = this.id ? SpreadsheetApp.openById(this.id) : SpreadsheetApp.getActiveSpreadsheet();
+            this.id = this.ss.getId();
             this.url = this.ss.getUrl();
             this.sheets = <[]>this.ss.getSheets();
         }
