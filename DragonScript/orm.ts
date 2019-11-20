@@ -44,15 +44,19 @@ namespace ORM {
         column_headers: string[] = [];
         column_headers_verbose: string[] = [];
 
+
         constructor() {
             super();
         }
 
+
         make() {
             this.setSheet();
+            this.get_headers();
             this.table_constructor()
             this.create_columns_directory();
         }
+
 
         table_constructor(): void {
             // Add new table if not exists, and add headers.
@@ -66,16 +70,21 @@ namespace ORM {
                         }
                     }
 
-                    if (!existSheet) {
-                        this.insertSheet(this.sheet_name, false);
-                    }
-
-                    // this.setSheet();
-                    this.get_headers();
                     if (this.sheet_active) {
                         let values: string[] = <[]>this.values();
+
                         try {
+                            // These are the headers as appears in first
+                            // Spreadsheet row. I call them "raw_value_headers".
                             let raw_values_headers = values[0];
+
+                            // Remove null types from headers.
+                            raw_values_headers = raw_values_headers.filter(function(el) {
+                                if (el) {
+                                    return el;
+                                }
+                            });
+
                             if (raw_values_headers.length < this.column_headers_verbose.length) {
 
                                 this.sheet_active.getRange(1, 1, 1, this.column_headers_verbose.length).setValues([this.column_headers_verbose]);
@@ -83,9 +92,10 @@ namespace ORM {
                             } else if (raw_values_headers.length > this.column_headers_verbose.length) {
                                 for (let raw_head of raw_values_headers) {
                                     if (this.column_headers_verbose.indexOf(raw_head) < 0) {
-                                        this.columns.push({ name: raw_head });
+                                        this.columns.push({ name: raw_head, default: null });
                                     }
                                 }
+                                this.get_headers();
                                 this.create_columns_directory();
                             }
                         } catch{
@@ -100,9 +110,6 @@ namespace ORM {
             } else {
                 throw new Error('Add id of Spreadsheet');
             }
-
-            // this.create_columns_directory();
-            // this.setSheet();
         }
 
 
@@ -162,6 +169,8 @@ namespace ORM {
 
         get_headers(): void {
             // Get headers and verbose_headers from column array
+            this.column_headers = [];
+            this.column_headers_verbose = [];
             for (let col of this.columns) {
                 let header_verbose: string;
                 if (col.verbose_name) {

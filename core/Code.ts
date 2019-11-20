@@ -1,26 +1,23 @@
-//Create the output evaluated, that allow use libraries.
+/// <reference path="settings.ts"/>
+
+//Create the output evaluated that allow use libraries.
 function doGet(): any {
     var output = HtmlService.createTemplateFromFile('index').evaluate();
-    output.setTitle('ProjectName').addMetaTag('viewport', 'width=device-width, initial-scale=1');
+    output.setTitle(SETTINGS.Project_name).addMetaTag('viewport', 'width=device-width, initial-scale=1');
 
     return output;
 }
 
 // Embebed APP
 function onOpen(): void {
-    SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
-        .createMenu('UDES Tools')
-        .addItem('Control de horas', 'showSidebar')
-        .addToUi();
-}
-
-function showSidebar(): void {
-    let ui = HtmlService.createTemplateFromFile('index').evaluate()
-        .setTitle('Panel de control');
-    SpreadsheetApp.getUi().showSidebar(ui);
-}
-
-function include(filename: string) {
-    return HtmlService.createHtmlOutputFromFile(filename)
-        .getContent();
+    let ui = null;
+    if (SETTINGS.Menu_name) {
+        ui = SpreadsheetApp.getUi().createMenu(SETTINGS.Menu_name);
+        for (let option of SETTINGS.Menu_options) {
+            if (option.type === 'item') {
+                ui.addItem(option.name, option.fn);
+            }
+        }
+        ui.addToUi();
+    }
 }

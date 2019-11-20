@@ -26,9 +26,11 @@ namespace GSS {
         sheet_active: GoogleAppsScript.Spreadsheet.Sheet | undefined = undefined;
         sheet_name?: string = '';
 
+
         constructor() {
             this.getSS()
         }
+
 
         copy(name: string, usethis: boolean = true): string | undefined {
             // Makes a document copy
@@ -52,6 +54,7 @@ namespace GSS {
             }
         }
 
+
         getSS() {
             this.ss = this.id ? SpreadsheetApp.openById(this.id) : SpreadsheetApp.getActiveSpreadsheet();
             this.id = this.ss.getId();
@@ -59,9 +62,10 @@ namespace GSS {
             this.sheets = <[]>this.ss.getSheets();
         }
 
+
         insertSheet(nameSheet: string, usethis: boolean = true) {
             // This insert new sheet_active in SS, if "usethis" is true, all values will been changed to the new sheet_active values.
-            // usethis is ture by default
+            // usethis is true by default
             try {
                 if (this.ss) {
                     let new_sheet: GoogleAppsScript.Spreadsheet.Sheet = this.ss.insertSheet(nameSheet);
@@ -77,12 +81,13 @@ namespace GSS {
             return false;
         }
 
+
         setSheet(sheet?: string | number) {
             // Set sheet_active: get sheet_active and values from data range
             if (!sheet && this.sheet_name) {
                 sheet = this.sheet_name;
             } else {
-                throw ("sheet_name is empty.");
+                throw ('"sheet_name" is empty.');
             }
 
             if (typeof sheet.valueOf() === 'string') {
@@ -91,13 +96,15 @@ namespace GSS {
                     if (get_sheet) {
                         this.sheet_active = get_sheet;
                     } else {
-                        throw new Error('No hay un SS del cual obtener la Hoja.')
+                        this.insertSheet(this.sheet_name);
+                        this.sheet_active = this.ss.getSheetByName(this.sheet_name);
                     }
                 }
             } else {
                 this.sheet_active = this.sheets[sheet];
             }
         }
+
 
         values(): object | boolean {
             if (this.sheet_active) {
