@@ -17,4 +17,10 @@ namespace SETTINGS {
     };
 
     export const Menu_options: menu_options_type[] = [];
+
+    export const DataBases: {} = {};
+
+    export const Apps: {} = {};
+
+    export const Urlpatterns: [] = [];
 }

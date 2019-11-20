@@ -1,7 +1,7 @@
 /// <reference path="settings.ts"/>
 
 //Create the output evaluated that allow use libraries.
-function doGet(): any {
+function doGet(e): any {
     var output = HtmlService.createTemplateFromFile('index').evaluate();
     output.setTitle(SETTINGS.Project_name).addMetaTag('viewport', 'width=device-width, initial-scale=1');
 
