@@ -5,7 +5,7 @@ namespace ORM {
 
     type column = {
         // colum?: number,
-        data_type: string,
+        data_type?: string,
         default?: any,
         index_col?: number,
         name: string;
@@ -14,13 +14,14 @@ namespace ORM {
 
     interface Model_table {
         // Vars
-        // sheet_name: string;
+        sheet_name: string;
         columns: column[];
         columns_directory: {};
         column_headers: string[];
         column_headers_verbose: string[];
 
         //Functions
+        make: () => void;
         all: (header?: string) => {} | [];
         create_columns_directory: () => void;
         get: (param: any, column: string | number) => object | undefined;
@@ -37,51 +38,78 @@ namespace ORM {
     }
 
     export abstract class Model extends GSS.SS implements Model_table {
-
-        // sheet_name: string;
+        sheet_name: string = '';
         columns: column[] = [];
         columns_directory: {} = {};
         column_headers: string[] = [];
         column_headers_verbose: string[] = [];
 
+
         constructor() {
             super();
-            // this.table_constructor()
-            // this.create_columns_directory();
+        }
+
+
+        make() {
+            this.setSheet();
+            this.get_headers();
+            this.table_constructor()
+            this.create_columns_directory();
         }
 
 
         table_constructor(): void {
             // Add new table if not exists, and add headers.
-            Logger.log(this.id);
-            Logger.log(this.sheet_name);
-            if (this.sheet_name && this.id) {
-                this.getSS();
-                let existSheet: boolean = false;
-                for (let sheet of this.sheets) {
-                    if (this.sheet_name === sheet.getName()) {
-                        existSheet = true;
-                        break;
+            if (this.ss) {
+                if (this.sheet_name) {
+                    let existSheet: boolean = false;
+                    for (let sheet of this.sheets) {
+                        if (this.sheet_name === sheet.getName()) {
+                            existSheet = true;
+                            break;
+                        }
                     }
-                }
 
-                if (!existSheet) {
-                    this.insertSheet(this.sheet_name, false);
-                }
+                    if (this.sheet_active) {
+                        let values: string[] = <[]>this.values();
 
-                this.setSheet(this.sheet_name);
-                this.get_headers();
-                if (this.sheet_active) {
-                    this.sheet_active.getRange(1, 1, 1, this.column_headers_verbose.length).setValues([this.column_headers_verbose]);
+                        try {
+                            // These are the headers as appears in first
+                            // Spreadsheet row. I call them "raw_value_headers".
+                            let raw_values_headers = values[0];
+
+                            // Remove null types from headers.
+                            raw_values_headers = raw_values_headers.filter(function(el) {
+                                if (el) {
+                                    return el;
+                                }
+                            });
+
+                            if (raw_values_headers.length < this.column_headers_verbose.length) {
+
+                                this.sheet_active.getRange(1, 1, 1, this.column_headers_verbose.length).setValues([this.column_headers_verbose]);
+
+                            } else if (raw_values_headers.length > this.column_headers_verbose.length) {
+                                for (let raw_head of raw_values_headers) {
+                                    if (this.column_headers_verbose.indexOf(raw_head) < 0) {
+                                        this.columns.push({ name: raw_head, default: null });
+                                    }
+                                }
+                                this.get_headers();
+                                this.create_columns_directory();
+                            }
+                        } catch{
+                            this.sheet_active.getRange(1, 1, 1, this.column_headers_verbose.length).setValues([this.column_headers_verbose]);
+                        }
+                    } else {
+                        throw new Error('There are not an Active Sheet.');
+                    }
                 } else {
-                    throw new Error('There are not an Active Sheet.');
+                    throw new Error('Add sheet_name');
                 }
             } else {
-                throw new Error('Add sheet_name and id in SS');
+                throw new Error('Add id of Spreadsheet');
             }
-
-            this.create_columns_directory();
-            this.setSheet()
         }
 
 
@@ -132,14 +160,17 @@ namespace ORM {
                 }
             } else if (type === 'boolean') {
                 return data;
+            } else {
+                return data;
             }
 
-            // return date;
         }
 
 
         get_headers(): void {
-            // Get headers from column array
+            // Get headers and verbose_headers from column array
+            this.column_headers = [];
+            this.column_headers_verbose = [];
             for (let col of this.columns) {
                 let header_verbose: string;
                 if (col.verbose_name) {
@@ -184,7 +215,7 @@ namespace ORM {
                 if (this.columns_directory.hasOwnProperty(column)) {
                     column_index = this.columns_directory[column];
                 } else {
-                    throw ('El header o nombre de columna al que se intenta acceder no existe.')
+                    throw ('Header or column name does not exist.')
                 }
             } else {
                 column_index = <number>column;
@@ -226,7 +257,7 @@ namespace ORM {
         }
 
         save(data: object | any) {
-            // WARNING: Resolver tipo any por object.
+            // WARNING: Change any type by object.
             let unziped: [] | any = this.unzip(data)
             let row: number = Number(data.row)
             try {

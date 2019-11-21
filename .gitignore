@@ -1,8 +1,8 @@
+/node_modules/*
 .clasp.json
 appsscript.json
-deprecated_depot/*
-node_modules/*
 package-lock.json
 package.json
-tests/*
 tsconfig.json
+/tests/*
+/deprecated_depot/*
