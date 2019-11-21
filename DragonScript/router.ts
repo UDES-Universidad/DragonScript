@@ -19,6 +19,4 @@ namespace ROUTER {
         return url_arr;
     }
 
-    export function
-
 }
