@@ -1,4 +1,4 @@
-namespace URLS {
+namespace ROUTER {
 
     export function path() {
 

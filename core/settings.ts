@@ -22,5 +22,9 @@ namespace SETTINGS {
 
     export const Apps: {} = {};
 
+    type Urlpatterns_type = {
+        name: string,
+        view: Function,
+    }
     export const Urlpatterns: [] = [];
 }
