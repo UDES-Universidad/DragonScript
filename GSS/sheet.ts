@@ -1,6 +1,6 @@
 /// <reference path="./book.ts"/>
 
-namespace Sheet {
+namespace SHEET {
 
     type sheet_type = GoogleAppsScript.Spreadsheet.Sheet;
 

@@ -1,4 +1,4 @@
-namespace Book {
+namespace BOOK {
 
     export type connexion = GoogleAppsScript.Spreadsheet.Spreadsheet;
 

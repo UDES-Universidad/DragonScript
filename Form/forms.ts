@@ -1,4 +1,4 @@
-namespace Form {
+namespace FORM {
 
     export function conn(id: string): GoogleAppsScript.Forms.Form {
         // Se coneta con un formulario.
