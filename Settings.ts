@@ -13,7 +13,7 @@ namespace SETTINGS {
     export const FAVICON = "http://udes.edu.mx/wp-content/uploads/2016/08/favicon.png";
 
     export const NOT_AUTH_PATH = "";
-    export const DEFAULT_PATH = "templates/index"
+    export const DEFAULT_PATH = "Templates/index"
 
     // APP DATA <<<
 

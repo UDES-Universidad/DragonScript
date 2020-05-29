@@ -37,12 +37,12 @@ namespace MODEL {
             "MAX": "The value is greater than the specified max",
         }
 
-        constructor(sheet: GoogleAppsScript.Spreadsheet.Sheet, row: number, cols: col[], data_raw: any[]) {
-            if (sheet && data_raw && row && cols) {
-                this.row = row;
+        constructor(sheet: GoogleAppsScript.Spreadsheet.Sheet, cols: col[], row?: number | boolean, data_raw?: any[]) {
+            if (sheet && cols) {
+                this.row = row ? row : false;
                 this.cols = cols;
                 this.sheet = sheet;
-                this.data_raw = data_raw
+                this.data_raw = data_raw ? data_raw : [];
                 this.zip();
             } else {
                 throw "This params are required: sheet, row, cols, data_raw";
@@ -57,7 +57,7 @@ namespace MODEL {
          */
         zip() {
             for (const col of this.cols) {
-                let value = this.data_raw[col.col];
+                let value = this.data_raw.length >= 1 ? this.data_raw[col.col] : '';
                 this.datas[col.name] = value;
             }
         }
@@ -91,8 +91,12 @@ namespace MODEL {
          */
         save() {
             this.unzip();
-            let range = this.sheet.getRange(this.row, 1, 1, this.data_raw.length);
-            range.setValues([this.data_raw]);
+            if (this.row) {
+                let range = this.sheet.getRange(this.row, 1, 1, this.data_raw.length);
+                range.setValues([this.data_raw]);
+            } else {
+                this.sheet.appendRow(this.data_raw);
+            }
         }
 
         // COMPROBACIONES >>>
@@ -104,6 +108,8 @@ namespace MODEL {
                 return Number(val);
             } else if (col.data_type === 'boolean') {
                 return Boolean(val);
+            } else if (col.data_type === 'datetime') {
+                return new Date(val);
             } else {
                 throw this.ERRORS.TYPE_NOT_RECOGNIZED + this.format_value_error(val, col, col.data_type);
             }
