@@ -1,5 +1,5 @@
 /// <reference path="./docs.ts" />
-/// <reference path="../Settings.ts" />
+/// <reference path="../Settings_App.ts" />
 
 
 function updateDoc() {

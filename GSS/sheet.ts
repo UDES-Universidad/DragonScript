@@ -1,101 +1,281 @@
-/// <reference path="./book.ts"/>
+/// <reference path="../Settings.ts" />
+
 
 namespace SHEET {
+    // TYPES >>>
+    type Spreadsheet_type = GoogleAppsScript.Spreadsheet.Spreadsheet;
+    type Sheet_type = GoogleAppsScript.Spreadsheet.Sheet;
+    type col = {
+        name: string,
+        data_type: string,
+        col: string,
+        verbose_name?: string,
+        default?: any,
+        // Choices [any, any ...]
+        choices?: any[],
+        max?: number,
+        min?: number,
+        auto_add?: any,
+    }
 
-    type sheet_type = GoogleAppsScript.Spreadsheet.Sheet;
+    // TYPES <<<
 
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     /**
-     * Se conecta a una hoja de un libro.
-     * @param conn : Conexión a un libro.
-     * @param name : Nombre de la hoja.
+     * Sheet Mother Class
      */
-    export function Sheet(conn: BOOK.connexion, name?: string): sheet_type {
-        // Trae una hoja de un SpreadSheet de Google, si no existe la crea.
-        if (name) {
-            let sheet = conn.getSheetByName(name);
-            if (sheet) {
-                return <sheet_type>sheet;
+    export class BaseSheet {
+        id_url_booK: string = '';
+        sheet_name: string = '';
+        book!: Spreadsheet_type;
+        sheet!: Sheet_type;
+
+
+        /**
+         * Connects with a Book.
+         */
+        book_conn(): Spreadsheet_type {
+            if (!this.book) {
+                if (this.id_url_booK) {
+                    if (this.id_url_booK.indexOf('https://docs.google.com/spreadsheets/') >= 0) {
+                        this.book = SpreadsheetApp.openByUrl(this.id_url_booK);
+                    } else {
+                        this.book = SpreadsheetApp.openById(this.id_url_booK);
+                    }
+                } else {
+                    this.book = SpreadsheetApp.getActiveSpreadsheet();
+                }
+            }
+            return this.book
+        }
+
+
+        /**
+         * Gets a sheet from book with a name,
+         * if not there are name return the current sheet.
+         */
+        sheet_conn(): Sheet_type {
+            let ss = this.book_conn();
+            if (this.sheet_name) {
+                this.sheet = <Sheet_type>ss.getSheetByName(this.sheet_name);
             } else {
-                return conn.insertSheet(name);
-
+                this.sheet = ss.getActiveSheet();
             }
-        } else {
-            return conn.getActiveSheet();
+            return this.sheet;
         }
-    }
 
 
-    /**
-     * Se conceta a una hoja de cálculo,
-     * si la hoja no existe la crea.
-     * @param id_book : ID o URL de un libro de cálculo.
-     * @param name_sheet : Nombre de una hoja de cálculo.
-     */
-    export function getSheet(id_book?: string, name_sheet?: string): sheet_type {
-        // Trae una hoja de un libro. Adiferencia de la función Sheet, esta
-        // función ejecuta también la conexión con el libro.
-        let conn = Book.conn(id_book);
-        let sheet = Sheet(conn, name_sheet);
-        return sheet;
-    }
+        /**
+         * Inserts a new sheet, if already exists
+         * return that sheet, and if there isn't name sheet
+         * add a name default that is in the SETTINGS.
+         */
+        insertSheet(): Sheet_type {
+            let ss = this.book_conn();
+            if (this.sheet_name) {
+                try {
+                    return ss.insertSheet(this.sheet_name);
 
-
-    /**
-     * Crea una tabla
-     * @param sheet : Hoja de cálculo.
-     * @param headers : Encabezados de la tabla.
-     * @param row_start : En qué fila comienzan los encabezados.
-     * @param col_start : En qué columna comienzan los encabezados.
-     */
-    export function create_table(sheet: sheet_type, headers: string[], row_start: number, col_start: number) {
-        // Aquí deberán ir todas las cosas para crear una tabla,
-        // de entrada inserta los encabezados de las columnas.
-        let range = sheet.getRange(row_start, col_start, 1, headers.length);
-        range.setFontWeight("bold");
-        range.setValues([headers]);
-    }
-
-
-    /**
-     * Obtiene los valores del rango de Datos.
-     * @param sheet : Hoja de cálculo.
-     * @param no_header : true si se quieren quitar los encabezados, por default true.
-     * @param data_starts_at : Fila en la que comienzan los datos.
-     */
-    export function rangeDataValues(sheet: sheet_type, no_header: boolean = true, data_starts_at: number = 1) {
-        // regresa los valores de la hoja de cálculo.
-        let values = sheet.getDataRange().getValues();
-        if (no_header) {
-            for (let i = 0; i < data_starts_at; i++) {
-                values.shift();
+                } catch (error) {
+                    return <Sheet_type>ss.getSheetByName(this.sheet_name);
+                }
+            } else {
+                return <Sheet_type>ss.getSheetByName(SETTINGS.DEFAULT_NAMESHEET);
             }
         }
-        return values;
+
     }
 
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     /**
-     * Regresa una columna como un array.
-     * @param sheet : Hoja de cálculo
-     * @param col : Columna que se va a combertir en array simple.
-     * @param no_header : Si se van a quitar o no los encabezados.
-     * @param _trim : Si se van a quitar los espacios extras.
+     * Sheet class
      */
-    export function col_as_array(sheet: sheet_type, col: number, no_header = true, _trim: boolean = true) {
-        // regresa una columna como un array unidimensional.
-        let values = sheet.getDataRange().getValues();
-        if (no_header) {
+    export class Sheet extends BaseSheet {
+
+        /**
+         * Return col as a simple array. This function not takes headers.
+         * @param col : number, in Google Sheets cols starts at 1 not in 0.
+         */
+        col_as_array(col: number) {
+            let values = this.sheet.getDataRange().getValues();
             values.shift();
-        }
-        let list = []
-        for (const value of values) {
-            let col_val = _trim ? String(value[col]).trim() : value[col];
-            list.push(col_val);
+            let list = []
+            for (const value of values) {
+                list.push(value[col]);
+            }
+
+            return list;
         }
 
-        return list;
     }
+
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    export class ModelSheet extends Sheet {
+
+        model!: BASE_MODEL;
+        cols: col[] = [];
+
+        get() {
+
+        }
+
+        filter() {
+
+        }
+
+        all() {
+
+        }
+
+    }
+
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    export class BASE_MODEL {
+
+        // Hoja de cálculo
+        sheet!: GoogleAppsScript.Spreadsheet.Sheet;
+        // Fila de la que proviene la información.
+        row!: number;
+        // Columnas: array de objetos con información de la columna.
+        cols!: col[];
+        // Datos obtenidos directamente de la hoja de cálculo.
+        data_raw!: any[];
+        // Se almacenan los datos creados por zip.
+        datas = {};
+
+        ERRORS = {
+            "TYPE_NOT_RECOGNIZED": "The type of element is not recognized",
+            "MUST_BE_STRING_OR_NUMBER": "Only string or number is allowed",
+            "MIN": "The value is smaller than the specified min",
+            "MAX": "The value is greater than the specified max",
+        }
+
+        constructor(sheet: GoogleAppsScript.Spreadsheet.Sheet, cols: col[], row?: number | boolean, data_raw?: any[]) {
+            if (sheet && cols) {
+                this.row = row ? row : false;
+                this.cols = cols;
+                this.sheet = sheet;
+                this.data_raw = data_raw ? data_raw : [];
+                this.zip();
+            } else {
+                throw "This params are required: sheet, row, cols, data_raw";
+            }
+        }
+
+        /**
+         * La función zip se encarga de crear un objeto key:value
+         * del array simple data_raw, que son los valores obtenidos
+         * directamente de la hoja de cálculo. EL objeto obtenido
+         * se crea según las opciones pasadas en el array de columnas.
+         */
+        zip() {
+            for (const col of this.cols) {
+                let value = this.data_raw.length >= 1 ? this.data_raw[col.col] : '';
+                this.datas[col.name] = value;
+            }
+        }
+
+        /**
+         * Guarda los valores del objeto obtenido
+         * de la funcion zip en el array data_raw.
+         * Este es el proceso previo a almacenamiento.
+         */
+        unzip() {
+            for (const col of this.cols) {
+                let value = this.datas[col.name];
+
+                value = this.check_type(value, col);
+                value = this.check_min(value, col);
+
+                if (!this.datas[col.name] && col.default) {
+                    value = col.default;
+                }
+
+                if (col.auto_add) {
+                    value = col.auto_add;
+                }
+
+                this.data_raw[col.col] = value;
+            }
+        }
+
+        /**
+         * Guarda los datos en la hoja de cálculo.
+         */
+        save() {
+            this.unzip();
+            if (this.row) {
+                let range = this.sheet.getRange(this.row, 1, 1, this.data_raw.length);
+                range.setValues([this.data_raw]);
+            } else {
+                this.sheet.appendRow(this.data_raw);
+            }
+        }
+
+        // COMPROBACIONES >>>
+
+        check_type(val: any, col: col) {
+            if (col.data_type === 'string') {
+                return String(val);
+            } else if (col.data_type === 'number') {
+                return Number(val);
+            } else if (col.data_type === 'boolean') {
+                return Boolean(val);
+            } else if (col.data_type === 'datetime') {
+                return new Date(val);
+            } else {
+                throw this.ERRORS.TYPE_NOT_RECOGNIZED + this.format_value_error(val, col, col.data_type);
+            }
+        }
+
+        check_min(val: string | number, col: col) {
+            if (col.hasOwnProperty('min')) {
+                if (col.data_type === 'string') {
+                    if (col.min > val.length) {
+                        throw this.ERRORS.MIN + this.format_value_error(val, col, col.data_type, col.min);
+                    }
+                } else if (col.data_type === 'number') {
+                    if (Number(col.min) > Number(val)) {
+                        throw this.ERRORS.MIN + this.format_value_error(val, col, col.data_type, col.min);
+                    }
+                }
+            }
+
+            return val;
+        }
+
+        check_max(val: string | number, col: col) {
+            if (col.hasOwnProperty('max')) {
+                if (col.data_type === 'string') {
+                    if (col.max < val.length) {
+                        throw this.ERRORS.MAX + this.format_value_error(val, col, col.data_type, col.max);
+                    }
+                } else if (col.data_type === 'number') {
+                    if (Number(col.max) < Number(val)) {
+                        throw this.ERRORS.MAX + this.format_value_error(val, col, col.data_type, col.max);
+                    }
+                }
+            }
+            return val;
+        }
+
+        // COMPROBACIONES <<<
+
+        format_value_error(val: any, col: col, data_type: string, condition?: any) {
+            return ` => COL_NAME: ${col.name}, DATA_TYPE: ${data_type}, VALUE: ${val}, ${condition ? 'CONDITION:' + condition : ''}.`
+        }
+    }
+
 
 
 }
