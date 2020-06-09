@@ -1,6 +1,10 @@
+/// <reference path="./book.ts"/>
+
 /// <reference path="../Settings.ts" />
 
-
+/**
+ * Clases de las hojas de cálculo.
+ */
 namespace SHEET {
     // TYPES >>>
     type Spreadsheet_type = GoogleAppsScript.Spreadsheet.Spreadsheet;
@@ -23,7 +27,7 @@ namespace SHEET {
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     /**
-     * Sheet Mother Class
+     * Mother Class Sheet
      */
     export class BaseSheet {
         id_url_booK: string = '';
@@ -92,7 +96,7 @@ namespace SHEET {
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     /**
-     * Sheet class
+     * Sheet class, in this class we must add methods.
      */
     export class Sheet extends BaseSheet {
 
@@ -117,21 +121,142 @@ namespace SHEET {
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+
+    /**
+     * This class use a Base Model for create an array of
+     * Models.
+     */
     export class ModelSheet extends Sheet {
 
-        model!: BASE_MODEL;
-        cols: col[] = [];
+        model = BASE_MODEL;
+        cols_map = {};
+        cols: col[];
 
-        get() {
 
+        make() {
+            this.book_conn();
+            this.sheet_conn();
         }
 
-        filter() {
 
+        /**
+         * Creates a map of cols, where each name
+         * corresponde to one col number.
+         */
+        map_table() {
+            if (!this.cols) {
+                throw "The attribute cols is empty.";
+            }
+            let cols_map = {}
+            for (let i = 0; i < this.cols.length; i++) {
+                let name = this.cols[i].name;
+                cols_map[name] = i;
+                cols_map[`${i}`] = name;
+            }
+
+            this.cols_map = cols_map
+            return cols_map;
         }
 
+        create(datas: {}) {
+            let obj_new = new this.model(this.sheet, this.cols);
+            obj_new.set_datas(datas)
+            obj_new.save();
+            return obj_new;
+        }
+
+        /**
+         * Change object of serach_params
+         * to an array of arrays: [[number col, value to compare], ...]
+         * @param search_params : object data
+         */
+        search_params_to_array(search_params: {}): [number, string][] {
+            let cols_map = this.map_table();
+            let params = []
+            for (const param in search_params) {
+                params.push(
+                    [parseInt(cols_map[param]), search_params[param]]
+                )
+            }
+
+            return params;
+        }
+
+
+        /**
+         * Return a col_data if all search_params match with
+         * his parallel item in the array col_data.
+         * @param search_params : terms search.
+         * @param col_data: data from a row.
+         */
+        search(search_params: [number, string][], col_data: string[][]) {
+            let search_params_length = search_params.length;
+            let counter_ok = 0;
+
+            for (const param of search_params) {
+                if (col_data[param[0]] === param[1]) {
+                    counter_ok++;
+                }
+            }
+
+            if (search_params_length === counter_ok) {
+                return col_data;
+            }
+        }
+
+        /**
+         * Return the first item that match with search_params.
+         * @param search_params : {key: value} params to search de wished item.
+         */
+        get(search_params: {}) {
+
+            let params = this.search_params_to_array(search_params)
+
+            let values = this.sheet.getDataRange().getValues();
+            for (let i = 1; i < values.length; i++) {
+                let data = this.search(params, values[i])
+                if (data) {
+                    return new this.model(this.sheet, this.cols, i + 1, data);
+                }
+            }
+        }
+
+
+        /**
+         * Return the all items that match with search_params.
+         * @param search_params : {key: value} params to search de wished item.
+         */
+        filter(search_params: {}) {
+            let params = this.search_params_to_array(search_params)
+            let datas = [];
+
+            let values = this.sheet.getDataRange().getValues();
+            for (let i = 1; i < values.length; i++) {
+                let data = this.search(params, values[i])
+                if (data) {
+                    datas.push(
+                        new this.model(this.sheet, this.cols, i + 1, data)
+                    );
+                }
+            }
+
+            return datas;
+        }
+
+
+        /**
+         * Return all items.
+         */
         all() {
+            let datas = [];
+            let values = this.sheet.getDataRange().getValues();
+            for (let i = 1; i < values.length; i++) {
+                datas.push(
+                    new this.model(this.sheet, this.cols, i + 1, values[i])
+                );
+            }
 
+            return datas;
         }
 
     }
@@ -140,17 +265,31 @@ namespace SHEET {
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+
+    /**
+     * This class is a Model for each row in de table.
+     */
     export class BASE_MODEL {
 
-        // Hoja de cálculo
+        /**
+         * Hoja de cálculo
+         */
         sheet!: GoogleAppsScript.Spreadsheet.Sheet;
-        // Fila de la que proviene la información.
+        /**
+         * Fila de la que proviene la información. Se le debe sumar 1.
+         */
         row!: number;
-        // Columnas: array de objetos con información de la columna.
+        /**
+         * Columnas: array de objetos con información de la columna.
+         */
         cols!: col[];
-        // Datos obtenidos directamente de la hoja de cálculo.
+        /**
+         * Datos obtenidos directamente de la hoja de cálculo.
+         */
         data_raw!: any[];
-        // Se almacenan los datos creados por zip.
+        /**
+         * Se almacenan los datos creados por zip.
+         */
         datas = {};
 
         ERRORS = {
@@ -163,20 +302,37 @@ namespace SHEET {
         constructor(sheet: GoogleAppsScript.Spreadsheet.Sheet, cols: col[], row?: number | boolean, data_raw?: any[]) {
             if (sheet && cols) {
                 this.row = row ? row : false;
-                this.cols = cols;
+                this.cols = this.add_col_number(cols);
                 this.sheet = sheet;
                 this.data_raw = data_raw ? data_raw : [];
                 this.zip();
             } else {
-                throw "This params are required: sheet, row, cols, data_raw";
+                throw "This params are required: sheet, cols";
             }
+        }
+
+
+        /**
+         * Agrega el número de la columna según la posición
+         * del elemento del array.
+         * @param cols : Columnas.
+         */
+        add_col_number(cols: col[]) {
+            for (let i = 0; i < cols.length; i++) {
+                cols[i].col = String(i);
+            }
+
+            return cols;
         }
 
         /**
          * La función zip se encarga de crear un objeto key:value
          * del array simple data_raw, que son los valores obtenidos
          * directamente de la hoja de cálculo. EL objeto obtenido
-         * se crea según las opciones pasadas en el array de columnas.
+         * se crea según las opciones pasadas en el array de columnas,
+         * donde name será la clave o claves del objeto.
+         * Si data_raw no existe entonces las claves son las mismas, pero el
+         * valor es un string vacío.
          */
         zip() {
             for (const col of this.cols) {
@@ -221,6 +377,24 @@ namespace SHEET {
                 this.sheet.appendRow(this.data_raw);
             }
         }
+
+
+        /**
+         * Cuando ya existen datos en datas se usa este método
+         * para reasignar los valores de un nuevo objeto con tados,
+         * que debe contener las mismas claves de objeto.
+         * @param new_datas
+         */
+        set_datas(new_datas: {}) {
+            for (const data in new_datas) {
+                if (this.datas.hasOwnProperty(data)) {
+                    this.datas[data] = new_datas[data];
+                }
+            }
+
+            return this.datas;
+        }
+
 
         // COMPROBACIONES >>>
 
@@ -275,7 +449,5 @@ namespace SHEET {
             return ` => COL_NAME: ${col.name}, DATA_TYPE: ${data_type}, VALUE: ${val}, ${condition ? 'CONDITION:' + condition : ''}.`
         }
     }
-
-
 
 }
