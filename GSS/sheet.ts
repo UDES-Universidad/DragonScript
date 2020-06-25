@@ -1,5 +1,4 @@
 /// <reference path="./book.ts"/>
-
 /// <reference path="../Settings.ts" />
 
 /**
@@ -74,19 +73,26 @@ namespace SHEET {
          * Inserts a new sheet, if already exists
          * return that sheet, and if there isn't name sheet
          * add a name default that is in the SETTINGS.
+         * @param name_sheet : nombre de la nueva hoja a insertar.
          */
-        insertSheet(): Sheet_type {
+        insertSheet(name_sheet?: string): Sheet_type {
             let ss = this.book_conn();
-            if (this.sheet_name) {
+            name_sheet = name_sheet ? name_sheet : this.sheet_name;
+            if (name_sheet) {
                 try {
-                    return ss.insertSheet(this.sheet_name);
+                    return ss.insertSheet(name_sheet);
 
                 } catch (error) {
-                    return <Sheet_type>ss.getSheetByName(this.sheet_name);
+                    return <Sheet_type>ss.getSheetByName(name_sheet);
                 }
             } else {
                 return <Sheet_type>ss.getSheetByName(SETTINGS.DEFAULT_NAMESHEET);
             }
+        }
+
+        get_book_sheet_names() {
+            return this.book.getSheets()
+                .map(el => el.getName());
         }
 
     }
@@ -101,18 +107,16 @@ namespace SHEET {
     export class Sheet extends BaseSheet {
 
         /**
-         * Return col as a simple array. This function not takes headers.
+         * Return col as a simple array. This function by default not takes headers,
+         * so the first row is discarted, but if as second param is pased a integer,
+         * it will taked as a row where column starts.
          * @param col : number, in Google Sheets cols starts at 1 not in 0.
          */
-        col_as_array(col: number) {
-            let values = this.sheet.getDataRange().getValues();
-            values.shift();
-            let list = []
-            for (const value of values) {
-                list.push(value[col]);
-            }
-
-            return list;
+        col_as_array(col: number, row: number = 2) {
+            let values = this.sheet
+                .getRange(row, col, this.sheet.getLastRow(), 1)
+                .getValues();
+            return values.map(el => el[0]);
         }
 
     }
@@ -128,6 +132,7 @@ namespace SHEET {
      */
     export class ModelSheet extends Sheet {
 
+        name!: string;
         model = BASE_MODEL;
         cols_map = {};
         cols: col[];
@@ -158,6 +163,11 @@ namespace SHEET {
             return cols_map;
         }
 
+
+        /**
+         * Creates a new object and returns it.
+         * @param datas
+         */
         create(datas: {}) {
             let obj_new = new this.model(this.sheet, this.cols);
             obj_new.set_datas(datas)

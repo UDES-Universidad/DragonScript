@@ -7,7 +7,7 @@ namespace TABLES {
         verbose_name?: string,
         default?: any,
         // Choices [any, any ...]
-        choices?: any[],
+        choices?: {},
         max?: number,
         min?: number,
         auto_add?: any,
