@@ -1,4 +1,4 @@
-/// <reference path="../Models/Model.ts" />
+/// <reference path="../Tables/Model.ts" />
 
 /**
  * Modelo del formulario

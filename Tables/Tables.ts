@@ -6,7 +6,6 @@ namespace TABLES {
         col: string,
         verbose_name?: string,
         default?: any,
-        // Choices [any, any ...]
         choices?: {},
         max?: number,
         min?: number,

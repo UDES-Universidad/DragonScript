@@ -82,7 +82,7 @@ namespace FIELDS {
      * @param data_field : datos del campo.
      * @param col_data : datos de la columna.
      */
-    export function InputTextField(data_field: field_data_content, col_data: col): { label: string, field: string } {
+    export function InputField(data_field: field_data_content, col_data: col): { label: string, field: string } {
         let label: string = create_label(data_field.label_text, col_data);
         let type = 'text';
         if (data_field.attrs.hasOwnProperty('type')) {
@@ -108,33 +108,6 @@ namespace FIELDS {
             field: input_field
         }
     }
-
-
-    /**
-     * Crea un Input de número
-     * @param data_field : datos del campo.
-     * @param col_data : datos de la columna.
-     */
-    export function InputNumberField(data_field: field_data_content, col_data: col): { label: string, field: string } {
-        let label: string = create_label(data_field.label_text, col_data);
-        let input_field = `<input type="number" name="${col_data?.name}" id="${col_data?.name + '_' + (col_data.col ? col_data.col : '')}"`;
-
-
-        input_field += add_col_attr(col_data);
-
-        for (const attr in data_field.attrs) {
-            input_field += ` ${attr}="${data_field.attrs[attr]}"`;
-        }
-
-        input_field += `${data_field.hidden ? 'hidden' : ''}`
-        input_field += `${data_field.required ? 'required' : ''}>`
-
-        return {
-            label: label,
-            field: input_field
-        }
-    }
-
 
     /**
      * Crea un Textarea.
@@ -207,6 +180,5 @@ namespace FIELDS {
             field: input_field
         }
     }
-
 
 }
