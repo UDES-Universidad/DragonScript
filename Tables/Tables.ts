@@ -1,3 +1,6 @@
+/// <reference path="../Settings.ts" />
+
+
 namespace TABLES {
 
     type col = {

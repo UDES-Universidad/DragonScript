@@ -1,3 +1,5 @@
+/// <reference path="../Tables/Tables.ts" />
+
 
 /**
  * Descripción de las columnas de cada
@@ -21,6 +23,20 @@ namespace Models {
     }
 
 
+    /* Example Model */
+    export function ExampleModel() {
+        class Example_Model extends SHEET.ModelSheet {
+            sheet_name = SETTINGS.EXAMPLE_SHEET;
+            cols = TABLES.EXAMPLE_TABLE;
+
+            constructor() {
+                super();
+                this.make();
+            }
+        }
+
+        return new Example_Model();
+    }
 
 
 }
