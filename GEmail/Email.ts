@@ -7,7 +7,6 @@ namespace EMAIL {
      * @param htmlBody : Cuerpo del mensaje HTML.
      */
     export function send_email(to: string, subject: string, htmlBody: string, cc?: string) {
-
         try {
             let email_data = {
                 to: to,
@@ -19,8 +18,8 @@ namespace EMAIL {
                 email_data['cc'] = cc;
             }
 
-            let email = MailApp.sendEmail(email_data);
-            return 200;
+            const email = MailApp.sendEmail(email_data);
+            return email;
         } catch (error) {
             return error
         }

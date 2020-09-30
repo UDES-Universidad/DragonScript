@@ -1,9 +1,8 @@
 namespace SETTINGS {
-
     export const DEFAULT_NAMESHEET = 'New_Sheet'
 
-    // APP DATA >>>
-
+    // APP DATA
+    // ----------------------------------
     export const DEBUG = true;
 
     export const APP_NAME = '';
@@ -17,15 +16,9 @@ namespace SETTINGS {
     export const NOT_AUTH_PATH = "";
     export const DEFAULT_PATH = "Templates/index"
 
-    // APP DATA <<<
-
-
-    // Firebas basedata >>>
-
+    // Firebase 
+    // ------------------------------------
     export const FIREBASE_URL = '';
     export const FIREBASE_SECRET = '';
-
-    // Firebas basedata <<<
-
 
 }
