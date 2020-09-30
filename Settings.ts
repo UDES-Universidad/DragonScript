@@ -2,9 +2,6 @@ namespace SETTINGS {
 
     export const DEFAULT_NAMESHEET = 'New_Sheet'
 
-
-}namespace SETTINGS_APP {
-
     // APP DATA >>>
 
     export const DEBUG = true;

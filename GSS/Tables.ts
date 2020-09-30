@@ -6,7 +6,7 @@ namespace TABLES {
     type col = {
         name: string,
         data_type: string,
-        col: string,
+        col?: string,
         verbose_name?: string,
         default?: any,
         choices?: {},
@@ -15,5 +15,5 @@ namespace TABLES {
         auto_add?: any,
     }
 
-
+    export const EXAMPLE_TABLE: col[] = []
 }

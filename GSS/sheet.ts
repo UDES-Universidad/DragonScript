@@ -1,4 +1,3 @@
-/// <reference path="./book.ts"/>
 /// <reference path="../Settings.ts" />
 
 /**

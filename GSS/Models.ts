@@ -1,4 +1,4 @@
-/// <reference path="../Tables/Tables.ts" />
+/// <reference path="./Tables.ts" />
 
 
 /**
@@ -23,11 +23,11 @@ namespace Models {
     }
 
 
-    /* Example Model */
-    export function ExampleModel() {
-        class Example_Model extends SHEET.ModelSheet {
-            sheet_name = SETTINGS.EXAMPLE_SHEET;
-            cols = TABLES.EXAMPLE_TABLE;
+    /* Generic Model */
+    export function GenericModel() {
+        class Generic_Model extends SHEET.ModelSheet {
+            sheet_name = SETTINGS.CHANGE_THIS;
+            cols = TABLES.CHANGE_THIS;
 
             constructor() {
                 super();
@@ -35,7 +35,7 @@ namespace Models {
             }
         }
 
-        return new Example_Model();
+        return new Generic_Model();
     }
 
 
