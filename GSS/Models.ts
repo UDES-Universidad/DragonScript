@@ -23,20 +23,23 @@ namespace Models {
     }
 
 
-    /* Generic Model */
-    export function GenericModel() {
-        class Generic_Model extends SHEET.ModelSheet {
-            sheet_name = SETTINGS.CHANGE_THIS;
-            cols = TABLES.CHANGE_THIS;
+    interface confGenericModel {
+        sheetName: string
+        table: col[]
+    }
+
+
+    export function GenericModel(conf: confGenericModel) {
+        class Example_Model extends SHEET.ModelSheet {
+            sheet_name = conf.sheetName;
+            cols = conf.table;
 
             constructor() {
                 super();
                 this.make();
             }
         }
-
-        return new Generic_Model();
+        return new Example_Model();
     }
-
 
 }
