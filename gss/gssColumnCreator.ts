@@ -2,66 +2,29 @@
  * AbstractColumn class.
  * */
 abstract class AbstractColumn {
-  protected _name: string = '';
+  public name: string = '';
 
-  get name() {
-    return this._name.substr(0);
-  }
+  public verboseName: string = '';
 
-  set name(theName: string) {
-    if (typeof theName !== 'string') {
-      throw new Error('name requires a string value.');
-    }
-    this._name = theName;
-  }
+  public forceConvertion: boolean = false;
 
-  protected _verboseName: string = '';
+  public required?: boolean = false;
 
-  get verboseName() {
-    return this._verboseName.substr(0);
-  }
+  public column?: number;
 
-  set verboseName(theVerboseName: string) {
-    if (typeof theVerboseName !== 'string') {
-      throw new Error('verboseName requires a string value.');
-    }
-    this._verboseName = theVerboseName;
-  }
-
-  protected _column?: number;
-
-  get column(): number {
-    return this.column;
-  }
-
-  set column(theColumn: number) {
-    if (typeof theColumn !== 'number') {
-      throw new Error('Column must be a number.');
-    }
-    this._column = theColumn;
-  }
-
-  protected _forceConvertion: boolean = false;
-
-  get forceConvertion() {
-    return this._forceConvertion;
-  }
-
-  set forceConvertion(force: boolean) {
-    this._forceConvertion = force;
-  }
-
-  protected _defaultValue?: any;
-
-  get defaultValue() {
-    return this._defaultValue;
-  }
-
-  set defaultValue(value: any) {
-    this._defaultValue = value;
-  }
+  public defaultValue?: any;
 
   public abstract validate(value: any): any;
+
+  public asignValues(payload: {}) {
+    Object.entries(payload).forEach((el) => {
+      if (el[0] in this) {
+        const [key, value] = el;
+        this[key] = value;
+      }
+    });
+    return this;
+  }
 }
 
 /*
@@ -77,10 +40,61 @@ export class GenericColumn extends AbstractColumn {
  * String column.
  * */
 export class StringColumn extends AbstractColumn {
-  public validate(value: any): string {
-    if (!value && this._defaultValue) return this._defaultValue;
-    if (this._forceConvertion) return String(value);
-    if (typeof value !== 'string') throw new Error(`Column ${this._column} must be a string but ir receibed and ${typeof value}.`);
+  static create(payload: {}): StringColumn {
+    return new StringColumn().asignValues(payload);
+  }
+
+  public validate(value: string): string {
+    if (this.required) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
+    if (!value && this.defaultValue) return this.defaultValue;
+    if (this.forceConvertion) return String(value);
+    if (typeof value !== 'string') throw new Error(`Column ${this.column} must be a string but it receibed a ${typeof value}.`);
     return value;
+  }
+}
+
+/*
+ * Number column.
+ * */
+export class NumberColumn extends AbstractColumn {
+  static create(payload: {}): NumberColumn {
+    return new NumberColumn().asignValues(payload);
+  }
+
+  public validate(value: number): number {
+    if (this.required) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
+    if (!value && this.defaultValue) return this.defaultValue;
+    if (this.forceConvertion) return Number(value);
+    if (typeof value !== 'number') throw new Error(`Column ${this.column} must be a string but it receibed a ${typeof value}.`);
+    return value;
+  }
+}
+
+/*
+ * Date column
+ * */
+export class DateTimeColumn extends AbstractColumn {
+  autoNowAdd: boolean = false;
+
+  autoNow: boolean = false;
+
+  static create(payload: {}): DateTimeColumn {
+    return new DateTimeColumn().asignValues(payload);
+  }
+
+  public validate(value: Date | string): Date | string {
+    if (this.required) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
+    if (this.autoNowAdd && !value) return new Date();
+    if (this.autoNow) return new Date();
+    if (value instanceof Date) return value;
+    if (typeof value === 'string') {
+      try {
+        return new Date(value);
+      } catch (e) {
+        throw new Error(`Error: ${e}\n. Fn: DateTimeColumn, column: ${this.column}, value: ${value}`);
+      }
+    }
+    if (!value) return '';
+    throw new Error(`Error: Value must be string o Date instance.\n. Fn: DateTimeColumn, column: ${this.column}, value: ${value}`);
   }
 }
