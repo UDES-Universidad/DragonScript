@@ -3,8 +3,9 @@ import GdocCreator from './gdocCreator';
 /**
  * Client method.
  * */
-namespace GdocClient {
-  export default const create = (urlOrId: string): GdocCreator => (
-    new GdocCreator().connect(urlOrId)
-  );
+
+export default class GdocClient {
+  static create(urlOrId: string): GdocCreator {
+    return new GdocCreator().connect(urlOrId);
+  }
 }

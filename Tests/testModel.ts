@@ -22,17 +22,40 @@ export default class Test {
       Logger.log('------------------------------');
     });
   }
-
+  
+  /**
+   * Print result.
+   * */
+  protected printerResult(result: boolean) {
+    if (result) {
+      Logger.log('✔ Test OK');
+    } else {
+      Logger.log('NOT PASSED');
+    }
+  }
+  
+  /**
+   * Gets the current class.
+   * */
   protected getCurrentClass(): Test {
-    const name = this.constructor.toString().split(' ')[1];
+    const name = this.constructor.toString()
+      .split(' ')[1]
+      .replace('()', '');
     return eval(name);
   }
-
-  protected sessertString(item1: string | number, item2: string | number): void {
-    if (item1 === item2) {
-      Logger.log('TEST OK');
-    } else {
-      Logger.log('Error');
-    }
+  
+  /**
+   * Check if tow items are equals, not works
+   * for objects or arrays.
+   * */
+  protected assertIsEqual(item1: any, item2: any): void {
+    this.printerResult(item1 === item2);
+  }
+  
+  /**
+   * Check if string includes a substring.
+   * */
+  protected assertStringIncludes(txt: string, txtBit: string): void {
+    this.printerResult(txt.includes(txtBit));
   }
 }
