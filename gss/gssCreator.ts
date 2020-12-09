@@ -1,26 +1,37 @@
 import CreatorApp from '../interfaces';
+import { AbstractColumn, GenericColumn } from './gssColumnCreator';
+import GssObjectsCreator from './gssObjects';
 
-class GssCreator implements CreatorApp {
+export default class GssCreator implements CreatorApp {
   private _app?: GoogleAppsScript.Spreadsheet.Spreadsheet;
 
   private _sheet?: GoogleAppsScript.Spreadsheet.Sheet;
 
   private _columnsMap = {};
 
-  private _columns = [];
+  private _table: AbstractColumn[] = [];
+
+  private _objectsModel = GssObjectsCreator;
 
   public get app(): GoogleAppsScript.Spreadsheet.Spreadsheet {
     return <GoogleAppsScript.Spreadsheet.Spreadsheet> this._app;
   }
 
-  public get url(): string {
+  get url(): string {
     return <string> this._app?.getUrl();
   }
 
-  public get id(): string {
+  get id(): string {
     return <string> this._app?.getId();
   }
+  
+  get sheet(): GoogleAppsScript.Spreadsheet.Sheet {
+    return <GoogleAppsScript.Spreadsheet.Sheet> this._sheet;
+  }
 
+  // Builder functions
+  // ------------------------------------------------------------
+  
   /**
    * Connects to the app.
    * @param urlOrId (string)
@@ -39,15 +50,44 @@ class GssCreator implements CreatorApp {
   /**
    * Set a sheet to work with it.
    * */
-  public setSheet(sheetName: string): void {
+  public setSheet(sheetName: string): GssCreator {
     const sheetNames = this.sheetNames();
-    if (sheetNames.indexOf(sheetName) > 0) {
+    if (sheetNames.indexOf(sheetName) > -1) {
       this._sheet = <GoogleAppsScript.Spreadsheet.Sheet>
         this._app?.getSheetByName(sheetName);
     } else {
       this._sheet = this._app?.insertSheet(sheetName);
     }
+    return this;
   }
+  
+  /*
+   * Set a columns.
+   * */
+  public setTable(columns: AbstractColumn[]) {
+    let counterColumn = 0;
+    if (columns && columns.length > 0) {
+      this._table = columns;
+      for (const column of columns) {
+        this._columnsMap[column.name] = counterColumn;
+        this._columnsMap[counterColumn] = column.name;
+        this._table[counterColumn].column = counterColumn;
+        counterColumn++;
+      }
+    } else {
+     
+      for (const item of Array.from(Array(4).keys())) {
+        const cel = `cell${item + 1}`;
+        this._table.push(GenericColumn.create({
+          name: cel,
+          verboseName: this._sheet.getRange(1, item + 1).getValue(),
+        }))
+        this._columnsMap[cel] = item;
+        this._columnsMap[item] = cel;
+      }   
+    }
+    return this;
+  };
 
   /**
    * Get and array of strings with the names of sheets.
@@ -57,10 +97,19 @@ class GssCreator implements CreatorApp {
     throw new Error('There is not assigned SpreadsheetApp.Spreadsheet in _app. Fn: CreatorApp.sheetNames');
   }
 
-  /*
-   * Set a columns.
-   * */
-  public setColumns() {};
+  // Object functions
+  // ------------------------------------------------------------
+
+  public Objects() {
+    return new this._objectsModel({
+      sheet: this._sheet,
+      table: this._table,
+      columnsMap: this._columnsMap,
+    })
+  }
+
+  // Inherited functions
+  // ------------------------------------------------------------
 
   /**
    * Creates a copy of document and return a GDOC object.
@@ -93,4 +142,7 @@ class GssCreator implements CreatorApp {
     const fileFromDrive = DriveApp.getFileById(this.id);
     fileFromDrive.setSharing(access, permission);
   }
+  
+  // Other functions
+  // ------------------------------------------------------------
 }

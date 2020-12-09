@@ -1,7 +1,17 @@
 /*
  * AbstractColumn class.
  * */
-abstract class AbstractColumn {
+
+export interface ConfAbstractColumn {
+  name: string;
+  verboseName?: string;
+  forceConvertion?: boolean;
+  required?: boolean;
+  column?: number;
+  defaultValue?: any;
+}
+
+export abstract class AbstractColumn {
   public name: string = '';
 
   public verboseName: string = '';
@@ -15,14 +25,17 @@ abstract class AbstractColumn {
   public defaultValue?: any;
 
   public abstract validate(value: any): any;
-
-  public asignValues(payload: {}) {
-    Object.entries(payload).forEach((el) => {
-      if (el[0] in this) {
-        const [key, value] = el;
-        this[key] = value;
-      }
-    });
+  
+  /*
+   * Assigns values to column properties. 
+   * */
+  public asignValues(values: ConfAbstractColumn) {
+    this.name = values.name;
+    this.verboseName = values.verboseName || '';
+    this.forceConvertion = values.forceConvertion || false;
+    this.required = values.required || false;
+    this.column = values.column;
+    this.defaultValue = values.defaultValue || '';
     return this;
   }
 }
@@ -31,6 +44,10 @@ abstract class AbstractColumn {
  * Generic column.
  * */
 export class GenericColumn extends AbstractColumn {
+  static create(values: ConfAbstractColumn): GenericColumn {
+    return new GenericColumn().asignValues(values);
+  }
+
   public validate(value: any): any {
     return value;
   }
@@ -42,6 +59,10 @@ export class GenericColumn extends AbstractColumn {
 export class StringColumn extends AbstractColumn {
   static create(payload: {}): StringColumn {
     return new StringColumn().asignValues(payload);
+  }
+
+  public bypass(value: any): string {
+    return String(value);
   }
 
   public validate(value: string): string {
@@ -60,6 +81,10 @@ export class NumberColumn extends AbstractColumn {
   static create(payload: {}): NumberColumn {
     return new NumberColumn().asignValues(payload);
   }
+  
+  public bypass(value: any): number {
+    return String(value)
+  }
 
   public validate(value: number): number {
     if (this.required) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
@@ -71,7 +96,7 @@ export class NumberColumn extends AbstractColumn {
 }
 
 /*
- * Date column
+ * Datetime column
  * */
 export class DateTimeColumn extends AbstractColumn {
   autoNowAdd: boolean = false;
