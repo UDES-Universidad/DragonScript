@@ -14,11 +14,11 @@ export default class Test {
     const classInstance = new TargetClass();
     fnTest.forEach((fn) => {
       Logger.log(`Testing: ${fn}`);
-      try {
-        classInstance[fn]();
-      } catch (error) {
-        Logger.log(`ERROR: ${error}`);
-      }
+      // try {
+         classInstance[fn]();
+      // } catch (error) {
+      //   Logger.log(`ERROR: ${error}`);
+      // }
       Logger.log('------------------------------');
     });
   }

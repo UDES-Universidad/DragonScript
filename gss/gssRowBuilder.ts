@@ -82,6 +82,7 @@ export class GssRow {
    * Saves data to spreadsheet table.
    * */
   public save(): void {
+    Logger.log(this._columnsMap);
     const datasToSave = this._datas.map((data, index) => this.validator(index).validate(data));
     const range = this._sheet.getRange(this._row, 1, 1, this._datas.length);
     range.setValues([datasToSave]);

@@ -1,5 +1,6 @@
 import GDocsSettings from './settings';
 import GdocClient from '../gdocs/gdocClient';
+import GdocCreator from '../gdocs/gdocCreator';
 import Test from '../Tests/testModel';
 
 /**
@@ -11,7 +12,7 @@ const GdocTester = () => new GdocTest().run();
  * Tester class for Gdoc.
  * */
 class GdocTest extends Test {
-  private app?: any;
+  private app?: GdocCreator;
 
   private constructor() {
     super();

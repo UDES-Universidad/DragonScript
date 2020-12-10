@@ -1,7 +1,3 @@
-/*
- * AbstractColumn class.
- * */
-
 export interface ConfAbstractColumn {
   name: string;
   verboseName?: string;
@@ -12,6 +8,10 @@ export interface ConfAbstractColumn {
   functionValidators?: ((value: any) => any)[];
 }
 
+
+/*
+ * AbstractColumn class.
+ * */
 export abstract class AbstractColumn {
   public name: string = '';
 
@@ -24,10 +24,19 @@ export abstract class AbstractColumn {
   public column?: number;
 
   public defaultValue?: any;
-
+  
   public functionValidators?: ((value: any) => any)[];
-
+  
+  /*
+   * Checks that a vuele meets the data required to be stored.
+   * */
   public abstract validate(value: any): any;
+  
+  /*
+   * Return a value as a string, this is used
+   * in filter method from GssObjectsCreator.
+   * */
+  public abstract chain(value: any): any;
   
   /*
    * Assigns values to column properties. 
@@ -65,7 +74,7 @@ export class GenericColumn extends AbstractColumn {
   static create(values: ConfAbstractColumn): GenericColumn {
     return new GenericColumn().asignValues(values);
   }
-
+  
   public validate(value: any): any {
     return value;
   }
@@ -86,6 +95,10 @@ export class StringColumn extends AbstractColumn {
     if (typeof value !== 'string') throw new Error(`Column ${this.column} must be a string but it receibed a ${typeof value}.`);
     return this._extraValidators(value, this.functionValidators);
   }
+
+  public chain(value: string): string {
+    return `'${value}'`;
+  }
 }
 
 /*
@@ -104,8 +117,12 @@ export class NumberColumn extends AbstractColumn {
     if (this.required && !value) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
     if (!value && this.defaultValue) return this.defaultValue;
     if (this.forceConvertion) return Number(value);
-    if (typeof value !== 'number') throw new Error(`Column ${this.column} must be a string but it receibed a ${typeof value}.`);
+    if (typeof value !== 'number') throw new Error(`Column ${this.column} must be a number but it receibed a ${typeof value}.`);
     return value;
+  }
+
+  public chain(value: number): string {
+    return `${value}`;
   }
 }
 
@@ -135,5 +152,9 @@ export class DateTimeColumn extends AbstractColumn {
     }
     if (!value) return '';
     throw new Error(`Error: Value must be string o Date instance.\n. Fn: DateTimeColumn, column: ${this.column}, value: ${value}`);
+  }
+
+  public chain(value: Date | string): string {
+    return `new Date(${value})`;
   }
 }

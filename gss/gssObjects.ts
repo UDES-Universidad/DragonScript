@@ -11,7 +11,7 @@ interface ConfParamsObjects {
   sheet: SpreadsheetApp.Spreadsheet.Sheet;
   columnsMap: {};
   table: AbstractColumn[];
-  rowIndexes: number[];
+  datas: GssRow[];
 }
 
 /*
@@ -20,7 +20,6 @@ interface ConfParamsObjects {
  * */
 interface ConfMayorDataGetters {
   reverse?: boolean;
-  removeFirstRow?: boolean;
   slice?: [number, number];
 }
 
@@ -43,71 +42,77 @@ export default class GssObjectsCreator {
 
   private _sheet?: SpreadsheetApp.Spreadsheet.Sheet;
 
-  private _rowIndexes: number[];
+  private _rows: GssRow[];
 
   private _columnMap: {};
 
   private _table: AbstractColumn[];
 
-  private 
-
   constructor(conf: ConfParamsObjects) {
     this._sheet = conf.sheet;
     this._columnMap = conf.columnsMap;
     this._table = conf.table;
-    if (conf.rowIndexes) this._rowIndexes = conf.rowIndexes;
+    if (conf.datas && conf.datas.length > 0) this._rows = conf.datas;
   }
 
+  get Rows() {
+    return this._rows;
+  }
+  
+  private _ObjectsCreator(datas: GssRow[]) {
+    return new GssObjectsCreator({
+      columnsMap: this._columnMap,
+      datas,
+      sheet: this._sheet,
+      table: this._table,
+    })
+  }
+
+  /*
+   * Row creator
+   * */
   private _createRow(dataforRow: ConfParamsGssRow) {
     return new this._rowBuilder({ ...dataforRow });
   }
   
-  private _searchStatementConstructor(searchParams: [string, any][]) {
+  /*
+   * Creates a statement for search in datas.
+   * */
+  private _searchStatement(searchParams: [string, any][]) {
     let statement = '';
     searchParams.forEach((item, index) => {
       const [columnName, value] = item;
       const columnNumber = this._columnMap[columnName];
+      const validator = this._table[columnNumber];
       if (index === 0) {
-        statement += `datas[${columnNumber}] === ${value}`;
+        statement += `row.getData('${columnName}') === ${validator.chain(value)}`;
       } else {
-        statement += `&& datas[${columnNumber}] === ${value}`;
+        statement += ` && row.getData('${columnName}') === '${validator.chain(value)}'`;
       }
     });
-
+    
     return statement;
   }
-
-  private *_generator(theRowIndexes: number[], searchParams?: [string, any][]) {
-    let searchStatement: string = '';
-    if (searchParams && searchParams.length > 0) searchStatement = this._searchStatementConstructor(searchParams);
-    for (const index of theRowIndexes) {
-      const datas = this._sheet
-        .getRange(index, 1, 1, this._sheet.getLastColumn())
-        .getValues(); 
-      if (searchStatement) {
-        if (eval(searchStatement)) {
-          const rowModel = this._createRow({
-            columnsMap: this._columnMap,
-            datas: datas && datas.length > 0 ? datas[0] : [], 
-            row: Number(index),
-            sheet: this._sheet,
-            table: this._table,
-          });
-          yield rowModel;
-        }
-      } else {
-        const rowModel = this._createRow({
-          columnsMap: this._columnMap,
-          datas: datas && datas.length > 0 ? datas[0] : [], 
-          row: Number(index),
-          sheet: this._sheet,
+  
+  private _retrieveDataFromTable() {
+    this._rows = this._rows && this._rows.length > 0 
+      ? this._rows
+      : this._sheet.getDataRange().getValues().map((datas: any[], index: number) => {
+        return this._createRow({
+          row: index + 1,
           table: this._table,
+          sheet: this._sheet,
+          columnsMap: this._columnMap,
+          datas,
         });
-        yield rowModel;
-      }
-    }
-  } 
+      });
+    this._rows.shift();
+    return this._rows;
+  }
 
+  /*
+   * Gets a row values by its number.
+   * */
   public getRowByNumber(rowNumber: number): GssRow {
     const range = this._sheet
       .getRange(rowNumber, 1, 1, this._sheet.getLastColumn());
@@ -123,28 +128,30 @@ export default class GssObjectsCreator {
   
   /*
    * Return all data.
-   * Parameter conversion priority:
-   * 1. removeFirstRow
-   * 2. reverse
-   * 3. slice
    * */
-  public getAll(conf?: ConfMayorDataGetters) {
-    this._rowIndexes = this._rowIndexes && this._rowIndexes.length > 0
-      ? this._rowIndexes 
-      : Array.from(Array(this._sheet.getLastRow() + 1).keys()).slice(1);
-    let dataToWork = this._rowIndexes.slice(0);
-    if (conf) {
-      if ('removeFirstRow' in conf && conf.removeFirstRow) dataToWork.shift();
-      if ('reverse' in conf && conf.reverse) dataToWork.reverse();
-      if('slice' in conf && conf.slice.length > 0) dataToWork = dataToWork.slice(conf.slice[0], conf.slice[1]);
-    }
-    return this._generator(dataToWork);
+  public getAll() {
+    return this._retrieveDataFromTable();
   } 
   
   /*
    * Gets datas by specific column-value.
+   * Parameter conversion priority:
+   * 1. slice
+   * 2. reverse
    * */
   public filter(conf?: ConfFilterData) {
-
+    this._rows = this._retrieveDataFromTable();
+    let indexes = Array.from(Array(this._rows.length).keys()); 
+    let results: GssRow[] = [];
+    const statement = this._searchStatement(Object.entries(conf.search));
+    if (conf) {
+      if('slice' in conf && conf.slice.length > 0) indexes = indexes.slice(...conf.slice);
+      if ('reverse' in conf && conf.reverse) indexes.reverse();
+    }
+    indexes.forEach(i => {
+      const row = this._rows[i];
+      if (eval(statement)) results.push(row);      
+    })
+    return this._ObjectsCreator(results);
   }
 }
