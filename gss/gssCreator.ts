@@ -68,6 +68,11 @@ export default class GssCreator implements CreatorApp {
     let counterColumn = 0;
     if (columns && columns.length > 0) {
       this._table = columns;
+      if (this._table.length !== this._sheet.getLastColumn()) {
+        throw new Error(
+          'Fn:gss/gssCreator.setTable. Error: Table length not corresponds with total columns in the spreadsheet'
+        );
+      }
       for (const column of columns) {
         this._columnsMap[column.name] = counterColumn;
         this._columnsMap[counterColumn] = column.name;

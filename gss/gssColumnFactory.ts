@@ -10,15 +10,15 @@ export default class GssColumn {
     return GenericColumn.create(values);
   }
 
-  static str(values: {}) {
+  static str(values: ConfAbstractColumn) {
     return StringColumn.create(values);
   }
 
-  static num(values: {}) {
+  static num(values: ConfAbstractColumn) {
     return NumberColumn.create(values);
   }
 
-  static datetime(values: {}) {
+  static datetime(values: ConfAbstractColumn) {
     return DateTimeColumn.create(values);
   }
 }

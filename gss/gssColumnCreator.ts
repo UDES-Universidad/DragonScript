@@ -9,6 +9,7 @@ export interface ConfAbstractColumn {
   required?: boolean;
   column?: number;
   defaultValue?: any;
+  functionValidators?: ((value: any) => any)[];
 }
 
 export abstract class AbstractColumn {
@@ -24,19 +25,36 @@ export abstract class AbstractColumn {
 
   public defaultValue?: any;
 
+  public functionValidators?: ((value: any) => any)[];
+
   public abstract validate(value: any): any;
   
   /*
    * Assigns values to column properties. 
    * */
-  public asignValues(values: ConfAbstractColumn) {
-    this.name = values.name;
-    this.verboseName = values.verboseName || '';
-    this.forceConvertion = values.forceConvertion || false;
-    this.required = values.required || false;
-    this.column = values.column;
-    this.defaultValue = values.defaultValue || '';
+  public asignValues(conf: ConfAbstractColumn) {
+    this.name = conf.name;
+    this.verboseName = conf.verboseName || '';
+    this.forceConvertion = conf.forceConvertion || false;
+    this.required = conf.required || false;
+    this.column = conf.column;
+    this.defaultValue = conf.defaultValue || '';
+    this.functionValidators = conf.functionValidators || [];
     return this;
+  }
+
+  /*
+   * Run functions that extra validate or transform
+   * a value to be saved.
+   * */
+  protected _extraValidators(valueTarget: any, functions: ((value: any) => any)[]): any {
+    let value = valueTarget; 
+    if (functions && functions.length > 0) {
+      functions.forEach(fn => {
+        value = fn(value);
+      });
+    }
+    return value;
   }
 }
 
@@ -61,16 +79,12 @@ export class StringColumn extends AbstractColumn {
     return new StringColumn().asignValues(payload);
   }
 
-  public bypass(value: any): string {
-    return String(value);
-  }
-
   public validate(value: string): string {
-    if (this.required) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
+    if (this.required && !value) throw new Error(`Fn: StringColumn, column: ${this.column}, value is required`);
     if (!value && this.defaultValue) return this.defaultValue;
     if (this.forceConvertion) return String(value);
     if (typeof value !== 'string') throw new Error(`Column ${this.column} must be a string but it receibed a ${typeof value}.`);
-    return value;
+    return this._extraValidators(value, this.functionValidators);
   }
 }
 
@@ -87,7 +101,7 @@ export class NumberColumn extends AbstractColumn {
   }
 
   public validate(value: number): number {
-    if (this.required) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
+    if (this.required && !value) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
     if (!value && this.defaultValue) return this.defaultValue;
     if (this.forceConvertion) return Number(value);
     if (typeof value !== 'number') throw new Error(`Column ${this.column} must be a string but it receibed a ${typeof value}.`);
@@ -108,7 +122,7 @@ export class DateTimeColumn extends AbstractColumn {
   }
 
   public validate(value: Date | string): Date | string {
-    if (this.required) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
+    if (this.required && !value) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
     if (this.autoNowAdd && !value) return new Date();
     if (this.autoNow) return new Date();
     if (value instanceof Date) return value;
