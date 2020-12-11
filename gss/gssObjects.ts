@@ -11,7 +11,7 @@ interface ConfParamsObjects {
   sheet: SpreadsheetApp.Spreadsheet.Sheet;
   columnsMap: {};
   table: AbstractColumn[];
-  datas: GssRow[];
+  rows: GssRow[];
 }
 
 /*
@@ -24,10 +24,18 @@ interface ConfMayorDataGetters {
 }
 
 /*
- * 
+ * Interface for filter method.
  * */
 interface ConfFilterData extends ConfMayorDataGetters {
   search: {};
+}
+
+/*
+ * Interface for filterBySheetRange.
+ * */
+interface ConfGetBySheetRange extends ConfMayorDataGetters {
+  range: number[];
+  search?: {};
 }
 
 // Classes
@@ -52,17 +60,17 @@ export default class GssObjectsCreator {
     this._sheet = conf.sheet;
     this._columnMap = conf.columnsMap;
     this._table = conf.table;
-    if (conf.datas && conf.datas.length > 0) this._rows = conf.datas;
+    if (conf.rows && conf.rows.length > 0) this._rows = conf.rows;
   }
 
   get Rows() {
     return this._rows;
   }
   
-  private _ObjectsCreator(datas: GssRow[]) {
+  private _ObjectsCreator(rows: GssRow[]) {
     return new GssObjectsCreator({
       columnsMap: this._columnMap,
-      datas,
+      rows,
       sheet: this._sheet,
       table: this._table,
     })
@@ -129,8 +137,13 @@ export default class GssObjectsCreator {
   /*
    * Return all data.
    * */
-  public getAll() {
-    return this._retrieveDataFromTable();
+  public getAll(conf?: ConfMayorDataGetters) {
+    let rows = this._retrieveDataFromTable(); 
+    if (conf) {
+      if('slice' in conf && conf.slice.length > 0) rows = rows.slice(...conf.slice);
+      if ('reverse' in conf && conf.reverse) rows.reverse();
+    }
+    return this._ObjectsCreator(rows);
   } 
   
   /*
@@ -138,6 +151,7 @@ export default class GssObjectsCreator {
    * Parameter conversion priority:
    * 1. slice
    * 2. reverse
+   * TODO: add super sexy search keys like email__endsWith: '@udes.edu.mx'.
    * */
   public filter(conf?: ConfFilterData) {
     this._rows = this._retrieveDataFromTable();
@@ -151,7 +165,43 @@ export default class GssObjectsCreator {
     indexes.forEach(i => {
       const row = this._rows[i];
       if (eval(statement)) results.push(row);      
-    })
+    });
     return this._ObjectsCreator(results);
   }
+  
+  /*
+   * Gets data from sheet by a custom range, 
+   * and it can search terms.
+   * */
+  public GetBySheetRange(conf: ConfGetBySheetRange) {
+    const results: GssRow[] = [];
+    const statement = 'search' in conf 
+      ? this._searchStatement(Object.entries(conf.search))
+      : "";
+    let rows = this._sheet.getRange(...conf.range).getValues()
+      .map((datas: any[], index: number) => {
+      return this._createRow({
+        columnsMap: this._columnMap,
+        datas,
+        row: index + 1,
+        sheet: this._sheet,
+        table: this._table,
+      });
+    });
+    if (conf) {
+      if('slice' in conf && conf.slice.length > 0) rows = rows.slice(...conf.slice);
+      if ('reverse' in conf && conf.reverse) rows.reverse();
+    }
+    if (statement){
+      rows.forEach((row: GssRow) => {
+        if (eval(statement)) results.push(row);
+      });
+      return this._ObjectsCreator(results);
+    } 
+    return this._ObjectsCreator(this._rows);
+  }
+
+  /*
+   * TODO: Add exclude method.
+   * */
 }

@@ -67,7 +67,7 @@ class GssTest extends Test {
   }
 
   test_columnsPredefined() {
-    const datas = this.app2.Objects().getAll();
+    const datas = this.app2.Objects().getAll().Rows;
     const item1 = datas[0];
     const firstName = item1.getData('firstName');
     const lastName = item1.getData('lastName');
@@ -87,7 +87,7 @@ class GssTest extends Test {
   }
 
   test_getAll() {
-    const datas = this.app.Objects().getAll();
+    const datas = this.app.Objects().getAll().Rows;
     this.assertIsEqual('Dulce ', datas[50].getData('cell2'));
     this.assertIsEqual('Milton eduardo', datas[49].getData('cell2'));
     this.assertIsEqual('Marbelia', datas[48].getData('cell2'));
@@ -100,18 +100,57 @@ class GssTest extends Test {
       search: {
         age: 43,
       },
-    })
+    });
 
-    Logger.log(datas.Rows.length);
-    Logger.log(datas.Rows[0].getData('firstName'));
+    this.assertIsEqual(
+      'Fernando',
+      datas.Rows[0].getData('firstName'),
+    );
 
+    const phone = '8776643754';
     const adrian = datas.filter({
       search: {
-        phone: '8776643754',
+        phone,
       },
     });
 
-    Logger.log(adrian.Rows[0].getData('firstName'));
-    Logger.log(adrian.Rows[0].getData('phone'));
+    this.assertIsEqual(
+      'adrian',
+      adrian.Rows[0].getData('firstName'),
+    );
+    this.assertIsEqual(
+      phone,
+      adrian.Rows[0].getData('phone'),
+    );
+  }
+
+  test_filterSliceReverse() {
+    const datas = this.app2.Objects().filter({
+      slice: [-10, -1],
+      reverse: true,
+      search: {
+        phone: '8553997117',
+      },
+    });
+
+    this.assertIsEqual(
+      'M.Lopez_Lopez@udes.edu.mx',
+      datas.Rows[0].getData('email'),
+    );
+  }
+
+  test_GetBySheetRange() {
+    const datas = this.app2.Objects().GetBySheetRange({
+      range: [
+        this.app2.sheet.getLastRow() - 10, 1,
+        11, this.app2.sheet.getLastColumn(),
+      ],
+      search: {
+        age: '',
+      },
+      reverse: true,
+    });
+    Logger.log(datas.Rows.map((row) => row.getData('firstName')));
+    this.assertIsEqual(2, datas.Rows.length);
   }
 }

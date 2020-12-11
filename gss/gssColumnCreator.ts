@@ -121,8 +121,8 @@ export class NumberColumn extends AbstractColumn {
     return value;
   }
 
-  public chain(value: number): string {
-    return `${value}`;
+  public chain(value: number | string): string {
+    return `${typeof value === 'string' && !value ? '""' : value }`;
   }
 }
 
