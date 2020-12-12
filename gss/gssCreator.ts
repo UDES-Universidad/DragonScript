@@ -65,7 +65,6 @@ export default class GssCreator implements CreatorApp {
    * Set a columns.
    * */
   public setTable(columns: AbstractColumn[]) {
-    let counterColumn = 0;
     if (columns && columns.length > 0) {
       this._table = columns;
       if (this._table.length !== this._sheet.getLastColumn()) {
@@ -73,23 +72,23 @@ export default class GssCreator implements CreatorApp {
           'Fn:gss/gssCreator.setTable. Error: Table length not corresponds with total columns in the spreadsheet'
         );
       }
-      for (const column of columns) {
-        this._columnsMap[column.name] = counterColumn;
-        this._columnsMap[counterColumn] = column.name;
-        this._table[counterColumn].column = counterColumn;
-        counterColumn++;
-      }
+      columns.forEach((column, index) => {
+        this._columnsMap[column.name] = index;
+        this._columnsMap[index] = column.name;
+        this._table[index].column = index;
+        index++;
+      });
     } else {
-     
-      for (const item of Array.from(Array(4).keys())) {
-        const cel = `cell${item + 1}`;
-        this._table.push(GenericColumn.create({
-          name: cel,
-          verboseName: this._sheet.getRange(1, item + 1).getValue(),
-        }))
-        this._columnsMap[cel] = item;
-        this._columnsMap[item] = cel;
-      }   
+      Array.from(Array(this._sheet.getLastColumn()).keys())
+        .forEach((index) => {
+          const cell = `cell${index + 1}`;
+          this._table.push(GenericColumn.create({
+            name: cell,
+            verboseName: this._sheet.getRange(1, index + 1).getValue(),
+          }))
+          this._columnsMap[cell] = index;
+          this._columnsMap[index] = cell;
+        });
     }
     return this;
   };

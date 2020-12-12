@@ -63,36 +63,40 @@ class GssTest extends Test {
   test_object_getByNumber() {
     const datas = this.app?.Objects().getRowByNumber(2);
     Logger.log(datas);
-    this.assertIsEqual('Balderas', datas.getData('cell3'));
+    this.assertIsEqual('Balderas', datas.getVal('cell3'));
   }
 
   test_columnsPredefined() {
-    const datas = this.app2.Objects().getAll().Rows;
-    const item1 = datas[0];
-    const firstName = item1.getData('firstName');
-    const lastName = item1.getData('lastName');
-    const age = item1.getData('age');
-    const phone = item1.getData('phone');
-    const email = item1.getData('email');
+    const obj = this.app2.Objects()
+    const datas = obj.getAll({
+      generator: true,
+      slice: [0, 10],
+    });
+    const item1 = datas.next().value;
+    const firstName = item1.getVal('firstName');
+    const lastName = item1.getVal('lastName');
+    const age = item1.getVal('age');
+    const phone = item1.getVal('phone');
+    const email = item1.getVal('email');
 
     Logger.log(`${firstName} ${lastName} ${age} ${phone} ${email}`);
 
     try {
-      item1.setData('firstName', 28);
-      item1.save();
+      item1.setVal('firstName', 28);
+      obj.saveRow(item1);
     } catch (error) {
-      item1.setData('firstName', 'John');
-      item1.save();
+      item1.setVal('firstName', 'Rebeca');
+      obj.saveRow(item1);
     }
   }
 
   test_getAll() {
     const datas = this.app.Objects().getAll().Rows;
-    this.assertIsEqual('Dulce ', datas[50].getData('cell2'));
-    this.assertIsEqual('Milton eduardo', datas[49].getData('cell2'));
-    this.assertIsEqual('Marbelia', datas[48].getData('cell2'));
-    this.assertIsEqual('Jaime', datas[47].getData('cell2'));
-    this.assertIsEqual('Eduardo', datas[46].getData('cell2'));
+    this.assertIsEqual('Dulce ', datas[50].getVal('cell2'));
+    this.assertIsEqual('Milton eduardo', datas[49].getVal('cell2'));
+    this.assertIsEqual('Marbelia', datas[48].getVal('cell2'));
+    this.assertIsEqual('Jaime', datas[47].getVal('cell2'));
+    this.assertIsEqual('Eduardo', datas[46].getVal('cell2'));
   }
 
   test_filter() {
@@ -104,7 +108,7 @@ class GssTest extends Test {
 
     this.assertIsEqual(
       'Fernando',
-      datas.Rows[0].getData('firstName'),
+      datas.Rows[0].getVal('firstName'),
     );
 
     const phone = '8776643754';
@@ -116,11 +120,11 @@ class GssTest extends Test {
 
     this.assertIsEqual(
       'adrian',
-      adrian.Rows[0].getData('firstName'),
+      adrian.Rows[0].getVal('firstName'),
     );
     this.assertIsEqual(
       phone,
-      adrian.Rows[0].getData('phone'),
+      adrian.Rows[0].getVal('phone'),
     );
   }
 
@@ -135,7 +139,7 @@ class GssTest extends Test {
 
     this.assertIsEqual(
       'M.Lopez_Lopez@udes.edu.mx',
-      datas.Rows[0].getData('email'),
+      datas.Rows[0].getVal('email'),
     );
   }
 
@@ -150,7 +154,7 @@ class GssTest extends Test {
       },
       reverse: true,
     });
-    Logger.log(datas.Rows.map((row) => row.getData('firstName')));
+    Logger.log(datas.Rows.map((row) => row.getVal('firstName')));
     this.assertIsEqual(2, datas.Rows.length);
   }
 }

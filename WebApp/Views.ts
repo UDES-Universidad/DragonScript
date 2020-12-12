@@ -1,6 +1,6 @@
 namespace VIEWS {
 
-    type url_param = {
+   type url_param = {
         parameter: {
             path: string,
             // ID de la hoja de cálculo.

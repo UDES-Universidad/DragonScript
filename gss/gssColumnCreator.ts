@@ -151,7 +151,7 @@ export class DateTimeColumn extends AbstractColumn {
       }
     }
     if (!value) return '';
-    throw new Error(`Error: Value must be string o Date instance.\n. Fn: DateTimeColumn, column: ${this.column}, value: ${value}`);
+    throw new Error(`Error: Value must be string or Date instance.\n. Fn: DateTimeColumn, column: ${this.column}, value: ${value}`);
   }
 
   public chain(value: Date | string): string {
