@@ -1,6 +1,16 @@
+const {dirname} = require('path');
+const path = require('path');
 const readline = require('readline');
 
 class AbstractArg {
+  baseDir = path.dirname(path.dirname(__dirname));
+
+  configFile = 'dragonScript.json';
+
+  dsModules = ['gss', 'gdocs', 'gslides', 'gmail', 'gform', 'webapp'];
+
+  parser = null;
+
   name = null;
 
   help = null;
@@ -11,6 +21,13 @@ class AbstractArg {
 
   process() {}
 
+  constructor(parser) {
+    this.parser = parser;
+  }
+
+  /**
+    * Return a command info.
+    * */
   toString() {
     return `- ${this.name}: ${this.help}`;
   }

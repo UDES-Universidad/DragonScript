@@ -9,6 +9,10 @@ npm install \
     @typescript-eslint/eslint-plugin@^4.4.1 \
     --save-dev
 
+npm install -g @google/clasp
+
+npm i -S @types/google-apps-script
+
 if [[ ! -f ./tsconfig.json ]]
 then 
     tsc --init

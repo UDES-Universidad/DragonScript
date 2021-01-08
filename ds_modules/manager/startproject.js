@@ -1,10 +1,9 @@
+const { execSync } = require("child_process");
 const fs = require('fs-extra');
 const path = require('path');
 const { ArgAbs } = require('./prototype');
 
 class StartProjectProto extends ArgAbs {
-  baseDir = null;
-
   name = 'startproject';
 
   help = 'creates a new GAS project.';
@@ -13,21 +12,28 @@ class StartProjectProto extends ArgAbs {
     projectName: null,
     gasId: null,
     gasIdDev: null,
-    dragonModules: [],
+    ds_modules: [],
   };
 
-  configFile = 'dragonScript.json';
+  filesToCopy = [
+    'Settings.ts',
+    '.eslintrc.js',
+    'tsconfig.json',
+  ];
 
-  dsModules = ['gss', 'gdocs', 'gslides', 'gmail', 'gform', 'webapp'];
+  commands = [
+    'npm init -y',
+    'npm install -g @google/clasp',
+    'npm install -g typescript',
+    'npm i -S @types/google-apps-script',
+    'npm install eslint eslint-config-airbnb-typescript eslint-plugin-import@^2.22.0 @typescript-eslint/eslint-plugin@^4.4.1 --save-dev',
+  ];
 
   constructor(parser) {
-    super();
-    this.baseDir = __dirname;
-    this.parser = parser;
+    super(parser);
   }
 
   argParser() {
-    const dirModules = path.dirname(this.baseDir);
     this.parser.add_argument(this.name, { help: this.help });
     this.parser.add_argument('-n', '--project-name', {
       action: 'store',
@@ -40,6 +46,10 @@ class StartProjectProto extends ArgAbs {
     this.parser.add_argument('-id', '--gas-id', {
       action: 'store',
       help: 'set GAS project id.',
+    });
+    this.parser.add_argument('-idd', '--gas-id-dev', {
+      action: 'store',
+      help: 'set GAS project id for dev.',
     });
     this.parser.add_argument('-am', '--add-module', {
       action: 'append',
@@ -60,29 +70,34 @@ class StartProjectProto extends ArgAbs {
       'Enter directory path: ',
     );
     let dsModules = await this.valArsOrPrompt(
-      'add_module', 
-      `Enter modules splited by comma (,). Modules allowed: ${this.dsModules.join(',')}: `,
+      'add_module',
+      `Enter modules splited by comma (,).\nDS modules allowed: ${this.dsModules.join(', ')}.\nModules: `,
     );
     dsModules = typeof dsModules === 'string'
       ? dsModules.split(',')
       : dsModules;
-    const id = await this.valArsOrPrompt('id');
+    const gasId = await this.valArsOrPrompt('gas_id');
+    const gasIdDev = await this.valArsOrPrompt('gas_id_dev');
+    // Configuration file in the new project.
     const configFile = path.join(projectPath, this.configFile);
+    // ds_modules in the new project.
     const dsModulesNewProject = path.join(projectPath, 'ds_modules');
-    const dirModules = path.dirname(this.baseDir);
-    if (projectName && projectPath && id) {
+    // ds_modules in Dragon Script App.
+    const dirModules = path.join(this.baseDir, 'ds_modules');
+    if (projectName && projectPath && gasId) {
       if (!fs.existsSync(projectPath)) {
         fs.mkdirSync(projectPath, { recursive: true });
         configData.projectName = projectName;
         configData.projectPath = projectPath;
-        configData.gasId = id;
+        configData.gasId = gasId;
+        configData.gasIdDev = gasIdDev;
+        configData.ds_modules = dsModules;
         fs.writeFileSync(configFile, JSON.stringify(configData));
         fs.mkdirSync(dsModulesNewProject);
         if (dsModules && dsModules.length > 0) {
           dsModules.forEach((moduleName) => {
-            const module = path.join(dirModules, moduleName);
+            const module = path.join(dirModules, moduleName.trim());
             if (moduleName && fs.existsSync(module)) {
-              console.log(module);
               fs.copySync(
                 module,
                 path.join(dsModulesNewProject, moduleName),
@@ -90,6 +105,15 @@ class StartProjectProto extends ArgAbs {
             }
           });
         }
+        this.filesToCopy.forEach((f) => fs.copySync(
+          path.join(this.baseDir, f),
+          path.join(projectPath, f),
+        ));
+        process.chdir(projectPath);
+        this.commands.forEach((c) => execSync(c));
+        if (gasId || gasIdDev) execSync(`clasp clone ${gasId || gasIdDev}`);
+      } else {
+        console.log('Project directory alreday exists.');
       }
     }
   }
