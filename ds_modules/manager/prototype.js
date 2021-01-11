@@ -1,13 +1,17 @@
-const {dirname} = require('path');
+const {ArgumentParser} = require('argparse');
 const path = require('path');
 const readline = require('readline');
 
-class AbstractArg {
-  baseDir = path.dirname(path.dirname(__dirname));
-
+class AbstractArgument {
   configFile = 'dragonScript.json';
 
-  dsModules = ['gss', 'gdocs', 'gslides', 'gmail', 'gform', 'webapp'];
+  dsModules = ['gss', 'gdocs', 'gslides', 'gmail', 'gforms', 'webapp', 'firebase'];
+
+  dsModulesName = 'ds_modules';
+
+  baseDir = null;
+
+  currentExecDir = null;
 
   parser = null;
 
@@ -17,12 +21,34 @@ class AbstractArg {
 
   argsv = null;
 
+  /**
+    * Get parse arguments from command line.
+    * */
   argParser() {}
 
-  process() {}
+  /**
+   * Execute all work with the arguments.
+    * */
+  processor() {}
 
   constructor(parser) {
     this.parser = parser;
+    this.baseDir = this._baseDir();
+    this.currentExecDir = this._currentExecDir();
+  }
+
+  /**
+    * Get a base directory where the core script is hosted.
+    * */
+  _baseDir() {
+    return path.dirname(path.dirname(__dirname));
+  }
+
+  /**
+   * Get directory where the script is executing.
+    * */
+  _currentExecDir() {
+    return process.cwd();
   }
 
   /**
@@ -37,7 +63,7 @@ class AbstractArg {
     * */
   exec() {
     this.argParser();
-    this.process();
+    this.processor();
   }
 
   /**
@@ -69,4 +95,4 @@ class AbstractArg {
   }
 }
 
-exports.ArgAbs = AbstractArg;
+module.exports = AbstractArgument;

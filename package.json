@@ -1,10 +1,10 @@
 {
   "name": "DragonScript",
   "version": "1.0.0",
-  "main": ".eslintrc.js",
+  "main": "ds-manage.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "manage": "./modules/manager/mange.js"
+    "manage": "./ds-manage.js"
   },
   "repository": {
     "type": "git",

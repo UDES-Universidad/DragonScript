@@ -1,0 +1,15 @@
+node_modules/**
+node_modules/**/.*/**
+node_modules/**/.*
+AppsTests
+.claspignore
+ds-manage.js
+.eslintrc.js
+.git
+.gitignore
+init_node.bash
+.ipynb_checkpoints
+package.json
+package-lock.json
+Tests
+tsconfig.json

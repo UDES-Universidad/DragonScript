@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-const { StartProject } = require('./startproject');
 const { ArgumentParser } = require('argparse');
+const StartProject = require('./startproject');
+const AppManage = require('./appmanage');
 
-const main = () => {
+const manage = () => {
   const mainArg = process.argv[2];
   const parser = new ArgumentParser({
     prog: 'DragonScript',
@@ -10,6 +11,7 @@ const main = () => {
   });
   const args = [
     StartProject(parser),
+    AppManage(parser),
   ];
   let noArgUsed = true;
   args.forEach((arg) => {
@@ -25,4 +27,4 @@ const main = () => {
   }
 };
 
-main();
+module.exports = manage;
