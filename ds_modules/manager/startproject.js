@@ -22,11 +22,10 @@ class StartProjectProto extends AbstractArgument {
     '.eslintrc.js',
     'tsconfig.json',
     '.claspignore',
-  ];
-
-  filesToCopyApp = [
     'Settings.ts',
   ];
+
+  filesToCopyApp = [];
 
   commands = [
     'npm init -y',
