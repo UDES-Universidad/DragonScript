@@ -1,13 +1,13 @@
-const {ArgumentParser} = require('argparse');
 const path = require('path');
 const readline = require('readline');
+const Settings = require('../../DragonScriptConfig');
 
 class AbstractArgument {
-  configFile = 'dragonScript.json';
+  configFile = Settings.configFile;
 
-  dsModules = ['gss', 'gdocs', 'gslides', 'gmail', 'gforms', 'webapp', 'firebase'];
+  dsModules = Settings.dsModules;
 
-  dsModulesName = 'ds_modules';
+  dsModulesName = Settings.dsModulesName;
 
   baseDir = null;
 
