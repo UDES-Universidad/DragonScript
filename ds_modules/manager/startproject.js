@@ -118,8 +118,8 @@ class StartProjectProto extends AbstractArgument {
         configData.gasId = gasId;
         configData.gasIdDev = gasIdDev;
         configData.ds_modules = dsModules;
-        fs.mkdirSync(projectPath);
-        fs.mkdirSync(appDir);
+        if (!fs.existsSync(projectPath)) fs.mkdirSync(projectPath);
+        if (!fs.existsSync(appDir)) fs.mkdirSync(appDir);
         fs.writeFileSync(configFile, JSON.stringify(configData, null, 4));
         if (dsModules && dsModules.length > 0) {
           fs.mkdirSync(dsModulesNewProject);
@@ -157,7 +157,7 @@ class StartProjectProto extends AbstractArgument {
           const claspData = JSON.parse(fs.readFileSync(claspFile).toString());
           claspData.scriptId = gasId || gasIdDev;
           fs.writeFileSync(claspNewProject, JSON.stringify(claspData));
-          execSync('clasp pull');
+          // execSync('clasp pull');
         }
         const jsFiles = fs.readdirSync(projectPath)
           .filter((i) => i.substr(-3) === '.js');
