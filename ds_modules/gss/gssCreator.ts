@@ -24,14 +24,14 @@ export default class GssCreator implements CreatorApp {
   get id(): string {
     return <string> this._app?.getId();
   }
-  
+
   get sheet(): GoogleAppsScript.Spreadsheet.Sheet {
     return <GoogleAppsScript.Spreadsheet.Sheet> this._sheet;
   }
 
   // Builder functions
   // ------------------------------------------------------------
-  
+
   /**
    * Connects to the app.
    * @param urlOrId (string)
@@ -60,7 +60,7 @@ export default class GssCreator implements CreatorApp {
     }
     return this;
   }
-  
+
   /*
    * Set a columns.
    * */
@@ -146,7 +146,6 @@ export default class GssCreator implements CreatorApp {
     const fileFromDrive = DriveApp.getFileById(this.id);
     fileFromDrive.setSharing(access, permission);
   }
-  
   // Other functions
   // ------------------------------------------------------------
 }

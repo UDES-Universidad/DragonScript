@@ -83,7 +83,7 @@ export default class GssObjectsCreator {
   get Rows() {
     return this._rows;
   }
-  
+
   private _ObjectsCreator(rows: GssRow[]) {
     return new GssObjectsCreator({
       columnsMap: this._columnsMap,
@@ -104,7 +104,7 @@ export default class GssObjectsCreator {
     };
     return new this._rowBuilder(conf);
   }
-  
+
   /*
    * Creates a statement for search in data.
    * */
@@ -122,7 +122,7 @@ export default class GssObjectsCreator {
     });
     return statement;
   }
-  
+
   /*
    * Gets data from table in Spreadsheet, and return it
    * as a array of GssRow, and removes the first row.
@@ -130,16 +130,14 @@ export default class GssObjectsCreator {
   private _retrieveDataFromTable() {
     this._rows = this._rows && this._rows.length > 0 
       ? this._rows
-      : this._sheet.getDataRange().getValues().map((data: any[], index: number) => {
-        return this._createRow({
-          row: index + 1,
-          data,
-        });
-      });
+      : this._sheet.getDataRange().getValues().map((data: any[], index: number) => this._createRow({
+        row: index + 1,
+        data,
+      }));
     this._rows.shift();
     return this._rows;
   }
-  
+
   /*
    * Gets data from Spreadsheet table and return it as a generator.
    * This method allows return most recent data from table.
@@ -147,7 +145,7 @@ export default class GssObjectsCreator {
   private *_RowGenerator(indexes: number[]) {
     for (const index of indexes) {
       const data = this._sheet.getRange(
-        index, 1, 1, this._sheet.getLastColumn()
+        index, 1, 1, this._sheet.getLastColumn(),
       ).getValues();
       const row = this._createRow({
         row: index,
@@ -169,8 +167,8 @@ export default class GssObjectsCreator {
   public saveRow(row: GssRow) {
     const dataToSave = row.data.map((value, index) => this._validator(index).validate(value));
     if (row.row) {
-    const range = this._sheet.getRange(row.row, 1, 1, row.data.length);
-    range.setValues([dataToSave]);
+      const range = this._sheet.getRange(row.row, 1, 1, row.data.length);
+      range.setValues([dataToSave]);
     } else {
       this._sheet.appendRow(dataToSave);
     }
@@ -199,7 +197,7 @@ export default class GssObjectsCreator {
       data: values.length > 0 ? values[0] : [],
     });
   }
-  
+
   /*
    * Return all data by two strategies:
    * 1. Brute: get all data of table as a snapshot and transforms 
@@ -217,20 +215,19 @@ export default class GssObjectsCreator {
       const lastRowTable = this._sheet.getLastRow() + 1;
       let indexes = Array.from(new Array(lastRowTable).keys()).slice(2);
       if (conf) {
-        if('slice' in conf && conf.slice.length > 0) indexes = indexes.slice(...conf.slice);
+        if ('slice' in conf && conf.slice.length > 0) indexes = indexes.slice(...conf.slice);
         if ('reverse' in conf && conf.reverse) indexes.reverse();
       }
       return this._RowGenerator(indexes);
-    } else {
-      let rows = this._retrieveDataFromTable(); 
-      if (conf) {
-        if('slice' in conf && conf.slice.length > 0) rows = rows.slice(...conf.slice);
-        if ('reverse' in conf && conf.reverse) rows.reverse();
-      }
-      return this._ObjectsCreator(rows);
     }
+    let rows = this._retrieveDataFromTable(); 
+    if (conf) {
+      if('slice' in conf && conf.slice.length > 0) rows = rows.slice(...conf.slice);
+      if ('reverse' in conf && conf.reverse) rows.reverse();
+    }
+    return this._ObjectsCreator(rows);
   } 
-  
+
   /*
    * Gets data by specific column-value.
    * Parameter conversion priority:

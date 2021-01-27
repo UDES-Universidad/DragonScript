@@ -23,6 +23,7 @@ class StartProjectProto extends AbstractArgument {
     'tsconfig.json',
     '.claspignore',
     'Settings.ts',
+    'init_node.bash',
   ];
 
   filesToCopyApp = [];
@@ -40,7 +41,10 @@ class StartProjectProto extends AbstractArgument {
   constructor(parser) {
     super(parser);
   }
-
+  
+  /**
+    * Arguments
+    * */
   argParser() {
     this.parser.add_argument(this.name, { help: this.help });
     this.parser.add_argument('-n', '--project-name', {
@@ -64,9 +68,16 @@ class StartProjectProto extends AbstractArgument {
       choices: this.dsModules,
       help: 'add module',
     });
+    this.parser.add_argument('-fe', '--force-directory', {
+      action: 'store_true',
+      help: 'force project creation even directory exists.',
+    });
     this.argsv = this.parser.parse_args();
   }
 
+  /**
+    * Executes al process to create a new project.
+    * */
   async processor() {
     const configData = this.projectData;
     const projectName = await this.valArsOrPrompt(
@@ -98,9 +109,10 @@ class StartProjectProto extends AbstractArgument {
     // Directory for user code.
     const appDir = path.join(projectPath, projectName.replace(' ', '_'));
     // Clasp file.
-    const claspFile = path.join(this.baseDir, '.clasp.json'); 
+    const claspFile = path.join(this.baseDir, '.clasp.json');
     if (projectName && projectPath) {
-      if (!fs.existsSync(projectPath)) {
+      if (!fs.existsSync(projectPath)
+        || this.argsv.force_directory) {
         configData.projectName = projectName;
         configData.projectPath = projectPath;
         configData.gasId = gasId;
@@ -135,7 +147,7 @@ class StartProjectProto extends AbstractArgument {
           appDir,
         );
         process.chdir(projectPath);
-        this.commands.forEach((c) => execSync(c));
+        // this.commands.forEach((c) => execSync(c));
         const claspNewProject = path.join(projectPath, '.clasp.json');
         fs.copySync(
           claspFile,
@@ -149,10 +161,14 @@ class StartProjectProto extends AbstractArgument {
         }
         const jsFiles = fs.readdirSync(projectPath)
           .filter((i) => i.substr(-3) === '.js');
-        jsFiles.forEach((f) => fs.renameSync(
-          path.join(projectPath, f),
-          path.join(appDir, f),
-        ));
+        jsFiles.forEach((f) => {
+          if (this.filesToCopyBase.indexOf(f) < 0) {
+            fs.renameSync(
+              path.join(projectPath, f),
+              path.join(appDir, f),
+            );
+          }
+        });
       } else {
         console.log('Project directory alreday exists.');
       }
