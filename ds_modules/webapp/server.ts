@@ -24,20 +24,32 @@ class Server {
   private static _router = Router();
 
   public static response(req: RequestGetInterface) {
-    const parameterRoute = SETTINGS.getProperty('parameterRoute');
-    const path = req.parameter[parameterRoute];
-    return this._router.getRouteByPath(path).view(req);
+    const argumentRoute = SETTINGS.getProperty('argumentRoute');
+    const path = req.parameter[argumentRoute];
+    const debug = Number(ScriptProperties.getProperty('debug'));
+    if (debug) {
+      urls();
+      return this._router.getRouteByPath(path).view(req);
+    }
+    try {
+      urls();
+      return this._router.getRouteByPath(path).view(req);
+    } catch (error) {
+      return Server.sendError(500, error.message);
+    }
+  }
+
+  public static sendError(code: number, error:string) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: code,
+      error,
+    })).setMimeType(ContentService.MimeType.JSON);
   }
 }
 
 const doGet = (req: RequestGetInterface) => {
-  urls();
-  try {
-    req.method = 'GET';
-    return Server.response(req);
-  } catch (error) {
-    return HtmlService.createHtmlOutput(error);
-  }
+  req.method = 'GET';
+  return Server.response(req);
 };
 
 const doPost = () => {};

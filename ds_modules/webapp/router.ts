@@ -148,7 +148,7 @@ class RouterSingleton {
         return item;
       }
     }
-    throw new Error('No path foud!');
+    throw new Error('No path found!');
   }
 
   /**
