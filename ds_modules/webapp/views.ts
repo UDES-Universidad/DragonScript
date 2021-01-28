@@ -5,6 +5,9 @@ import SETTINGS from '../../Settings';
 import { RequestGetInterface } from './server';
 
 export default class View {
+  /**
+   * Render html using a html template.
+   * */
   public static render(request: {},
     template: string,
     context: {} = {}) {
@@ -27,13 +30,19 @@ export default class View {
     return evaluated;
   }
 
-  public static response(str: string) {
+  /**
+   * Response in plain text.
+   * */
+  public static plainTextResponse(str: string) {
     const favicon = SETTINGS.getProperty('favicon');
     const resp = HtmlService.createHtmlOutput(str);
     if (favicon) resp.setFaviconUrl(favicon);
     return resp;
   }
 
+  /**
+   * Response en JSON.
+   * */
   public static JSONresponse(data: any) {
     return ContentService.createTextOutput(JSON.stringify(data))
       .setMimeType(ContentService.MimeType.JSON);
