@@ -8,13 +8,13 @@ This example uses TypeScript and [Google Clasp](https://developers.google.com/ap
 
 Create a new [Google App Script standalone](https://developers.google.com/apps-script/guides/standalone).
 
-Use DrangoScript manager to create a new project: `node manager.js startproject`.
+Use DrangoScript manager to create a new project: `node ds-manager.js startproject`.
 
 When the manager ask you for the modules that it will use write: webapp.
 
-Execute `node ./manager.js app -pull`.
+Execute `node ./ds-manager.js app -pull`.
 
-In the DragonExample directory inner your project directory create two files: __views.ts__ and __urls.ts__.
+In the DragonExample directory inner your project directory create two files: __https.ts__ and __urls.ts__.
 
 ### Project structure
 
@@ -24,19 +24,19 @@ In the DragonExample directory inner your project directory create two files: __
       |   |_ webapp
       |_DragonExample
           |_urls.ts
-          |_views.ts
+          |_https.ts
 
-### views.ts
+### https.ts
     
-    // This module imports Views module.
-    import View from '../ds_modules/webapp/views';
+    // This module imports Https module.
+    import Http from '../ds_modules/webapp/http';
       
     /**
     * This module simply render a "Hello, World!" in
     * plain text.
     */
     export default const helloWorld = (request: { parameters: {} }) => {
-      return View.plainTextResponse('Hello, World!') 
+      return Http.plainTextResponse('Hello, World!') 
     }
 
 ### urls.ts
@@ -51,12 +51,12 @@ A urls functions is needed declared in any place of project, but is a good pract
       const paths = Router();
     
       /**
-       * Route to your helloWorld view.
+       * Route to your helloWorld http.
        * */
       paths.addRoute({
         name: 'helloWorld',
         path: 'hello',
-        view: helloWorld,
+        http: helloWorld,
       });
     };
 
@@ -69,12 +69,21 @@ And implements your [web app](https://developers.google.com/apps-script/guides/w
 Now in search bar browser write: your-url-project?path=hello
 
 That is all.
- 
 
+## Function Views
 
+Views are functions that returns a http response.
 
+Http responses are contained in the class Http. You can import this class by this way: `import Http from
+'../ds_modules/webapp/http';`.
 
+Http class contains next static methods:
 
+__plainTextResponse(str: string)__: recibe a string and returns a simple string.
 
+__JSONresponse(data: any)__: recibe a Javascript code and returns a JSON.
 
+__htmlResponse(html: string)__: recibe a html in string and return a html.
 
+__render(request: {}, template: string, context: {})__: recibe a request object, template is the path to template in
+Google Apps Script syntax, and context, values that will rendered in the template. Return a html.

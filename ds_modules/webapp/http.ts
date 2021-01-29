@@ -1,10 +1,10 @@
 /**
- * This module manage views.
+ * This module manage Http responses.
  * */
 import SETTINGS from '../../Settings';
 import { RequestGetInterface } from './server';
 
-export default class View {
+export default class Http {
   /**
    * Render html using a html template.
    * */
@@ -15,6 +15,7 @@ export default class View {
       'request is a required parameter in render function, it must by placed in the first position.'
     );
     const favicon = SETTINGS.getProperty('favicon');
+    const title = SETTINGS.getProperty('title');
     const resp = HtmlService.createTemplateFromFile(template);
     resp.request = request;
     if (context && Object.keys(context).length > 0) {
@@ -26,8 +27,21 @@ export default class View {
     }
     const evaluated = resp.evaluate();
     if (favicon) evaluated.setFaviconUrl(favicon);
+    if (title) evaluated.setTitle(title);
     if (context.hasOwnProperty('setTitle')) evaluated.setTitle(context.setTile)
     return evaluated;
+  }
+
+  /**
+   * Return simple html.
+   * */
+  public static htmlResponse(html: string) {
+    const htmlResponse =  HtmlService.createHtmlOutput(html);
+    const favicon = SETTINGS.getProperty('favicon');
+    const title = SETTINGS.getProperty('title');
+    if (favicon) htmlResponse.setFaviconUrl(favicon);
+    if (title) htmlResponse.setTitle(title);
+    return htmlResponse;
   }
 
   /**
