@@ -87,3 +87,72 @@ __htmlResponse(html: string)__: recibe a html in string and return a html.
 
 __render(request: {}, template: string, context: {})__: recibe a request object, template is the path to template in
 Google Apps Script syntax, and context, values that will rendered in the template. Return a html.
+
+## Urls
+
+Urls are called by this way only for confort, because in GAS (Google Apps Script) is not possible use a customs URLs, but we can emulate this by the use of GET arguments. By default DS (DragonScript) use argument __path__ to recibe the route to some resource. By example:
+
+`this-is-a-GAS-url/exec?path=some/route`
+
+To create a new route we need to use a __Router__ class. All routes that you create must be inner a function called __urls__, that can be declared in any place, but we recommend create a file only for this purpose. You can import a router by this way: `import Router from '../ds_modules/webapp/router';`
+
+## Router
+
+### Add routes
+
+With a __Rauter__ class you can create a new routes and get and absolute path from a resource by its name.
+
+To create a single route:
+  
+    Router().addRoute({
+      name: 'This_is_a_name_for_my_route',
+      path: '/this/is/my/path',
+      view: here_put_your_function_view,
+    })
+
+Browser URL bar: GAS-url/exec?path=/this/is/my/path
+
+Also you can create a group routes:
+
+    Router().addGroupRoutes([
+      'NameGroup',
+      [
+        {
+          name: 'route1',
+          path: '/this/is/my/path/1',
+          view: view1,
+        }
+        {
+          name: 'route2',
+          path: '/this/is/my/path/2',
+          view: view2,
+        }
+        ...
+      ]
+    ])
+
+Browser URL bar: 
+  - GAS-url/exec?path=groupName/this/is/my/path/1
+  
+  - GAS-url/exec?path=groupName/this/is/my/path/2
+
+### Get a absolute route by name
+
+You can get a absolute url (route) doing:
+    
+    // Single route
+    Router().getUrlByName('myRouteName');
+    // Route in group
+    Router().getUrlByName('groupName:routeName');
+
+This function returns: `GAS-url/exec?path=your/rotue/path`.
+
+Also you can do it this in a template:
+
+    ...
+      <a href="<?= Router().getUrlByName('routeName') ?>" target="_top">
+        My link to another page.
+      </a>
+    ...
+
+
