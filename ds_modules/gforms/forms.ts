@@ -3,14 +3,22 @@
  * */
 
 class GformCreator {
-  private app: GoogleAppsScript.Forms.Form;
+  private _app: GoogleAppsScript.Forms.Form;
+  
+  constructor(urlOrId?: string) {
+    this._connect(urlOrId || '')
+  }
 
   get id():string {
-    return this.app.getId();
+    return this._app.getId();
   }
 
   get urlEdit(): string {
-    return this.app.getEditUrl();
+    return this._app.getEditUrl();
+  }
+
+  get App (): GoogleAppsScript.Forms.Form {
+    return this._app;
   }
 
   /**
@@ -18,79 +26,55 @@ class GformCreator {
    * @param urlOrId (string): URL or id or nothing to
    * connect to the active form.
    * */
-  public connect(urlOrId?: string): GformCreator {
+  private _connect(urlOrId?: string) {
     if (urlOrId && urlOrId.includes('google.com')) {
-      this.app = FormApp.openByUrl(urlOrId);
-    } else if (urlOrId) {
-      this.app = FormApp.openById(urlOrId);
+      this._app = FormApp.openByUrl(urlOrId);
+    } else if (urlOrId && urlOrId?.length > 0) {
+      this._app = FormApp.openById(urlOrId);
+    } else if (!urlOrId) {
+      this._app = FormApp.getActiveForm();
     }
-    this.app = FormApp.getActiveForm();
-    return this;
   }
 
   /**
    * Gets information about questions.
    * */
-  public infoQuestions() {
-    // Obtiene las preguntas
-    const items = this.app.getItems();
+  public itemsInfo() {
+    // Get questions.
+    const items = this._app.getItems();
     const questions = [];
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       questions.push({
         type: item.getType(),
-        id: item.getId(),
-        index: item.getIndex(),
+        id: String(item.getId()),
+        index: String(item.getIndex()),
         title: item.getTitle(),
-        help_text: item.getHelpText(),
+        helpText: item.getHelpText(),
+        item: item,
       });
     }
     return questions;
   }
+  
+  /**
+   * Get form items by type
+   * */
+  public getItemByType(itemType: GoogleAppsScript.Forms.ItemType) {
+    const itemsInfo = this.itemsInfo();
+    return itemsInfo.filter((i) => i.type == itemType);
+  }
+
+  /**
+   * Get a item by a substring 
+   * */
+  public getItemBySubString(substring: string, property: 'title' | 'helpText') { 
+    const itemsInfo = this.itemsInfo();
+    return itemsInfo.filter((i) => i[property].includes(substring));
+  }
 }
 
-/*
- * namespace FORM {
 
-    export class Model {
-        form: GoogleAppsScript.Forms.Form
-
-        constructor(id_url: string) {
-            this.form = this.conn(id_url)
-        }
-
-        conn(id_url: string) {
-            if (id_url.indexOf('https://docs.google.com/forms/')) {
-                return FormApp.openByUrl(id_url);
-            } else if (id_url) {
-                return FormApp.openByUrl(id_url);
-            }
-
-            return FormApp.getActiveForm();
-        }
-
-        infoQuestions() {
-            // Obtiene las preguntas
-            let items = this.form.getItems()
-            let questions = []
-
-            for (let i = 0; i < items.length; i++) {
-                let item = items[i];
-                questions.push(
-                    {
-                        type: item.getType(),
-                        id: item.getId(),
-                        index: item.getIndex(),
-                        title: item.getTitle(),
-                        help_text: item.getHelpText(),
-                    }
-                );
-            }
-
-            return questions
-        }
-
-    }
-
-
-}*/
+export default const GformClient = (urlOrId: string): GformCreator => {
+  return new GformCreator(urlOrId);
+}

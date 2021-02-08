@@ -104,7 +104,7 @@ export default class GssCreator implements CreatorApp {
   // Object functions
   // ------------------------------------------------------------
 
-  public Objects() {
+  public Objects(): GssObjectsCreator {
     return new this._objectsModel({
       sheet: this._sheet,
       table: this._table,

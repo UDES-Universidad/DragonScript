@@ -1,39 +1,55 @@
+import GmailSenderBuilder from './gmailSenderBuilder';
+import GmailSearchBuilder from './gmailSearchBuilder';
+
+/**
+ * Interfaces.
+ * */
+interface baseConf {
+  attachments?: [string, any][];
+  htmlTemplateBase?: string;
+  message?: string;
+  messageFileTemplate?: string;
+  templateFile?: string;
+  stringTemplate?: string;
+  subject: string;
+}
+
 /**
  * Client method.
  * */
-namespace GMail {
-
-  // Interfaces
-  // ------------------------------------------------------------
-  interface Conf {
-    templatePath: string;
-    subject: string;
-    msg: string;
+export default class GmailClient {
+  /**
+   * Send email using evaluate mode, that is, 
+   * replace variables (<?= var ?>) in the html file.
+   * */
+  public static sendFromTemplate(conf: baseConf) {
+    const gmail = new GmailSenderBuilder();
+    gmail.templateFile = conf.templateFile;
+    gmail.subject = conf.subject;
+    gmail.createTemplateFromFile();
+    return gmail;
   }
 
-  // Creators
-  // ------------------------------------------------------------
   /**
-   * Creates a Gmail object from GmailBuilder
-   * and return it without configuration.
+   * Can get the base template from string (stringTemplate)
+   * or from template (templateFile).
    * */
-  export const Base = (): GmailBuilder => new GmailBuilder();
+  public static sendAndReplaceMarks(conf: baseConf) {
+    const gmail = new GmailSenderBuilder();
+    gmail.evaluateMode = false;
+    if (conf.hasOwnProperty('templateFile')) gmail.templateFile = conf.templateFile;
+    if (conf.hasOwnProperty('stringTemplate')) gmail.htmlStringTemplate = conf.stringTemplate;
+    gmail.subject = conf.subject;
+    if ('message' in conf) gmail.message = conf.message;
+    if ('messageFileTemplate' in conf) gmail.messageFileTemplate = conf.messageFileTemplate;
+    gmail.createFullMessage();
+    return gmail;
+  }
 
-  /**
-   * Creates a Gmail object and return it with a pre configuration
-   * where de msg is taken from a string.
+  /*
+   * Return a GmailSenderBuilder.
    * */
-  export const FromString = (conf: Conf): GmailBuilder => new GmailBuilder()
-    .baseTemplate(conf.templatePath)
-    .setSubject(conf.subject)
-    .setMessage(conf.msg);
-
-  /**
-   * Creates a Gmail object and return it with a pre configuration
-   * where de msg is taken from a template string.
-   * */
-  export const FromTemplateFile = (conf: Conf): GmailBuilder => new GmailBuilder()
-    .baseTemplate(conf.templatePath)
-    .setSubject(conf.subject)
-    .setMessageFromFile(conf.msg);
+  public static searcher() {
+    return new GmailSearchBuilder();
+  }
 }

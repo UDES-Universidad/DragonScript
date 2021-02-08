@@ -1,5 +1,5 @@
 import {
-  ConfAbstractColumn, GenericColumn, StringColumn, NumberColumn, DateTimeColumn,
+  ConfAbstractColumn, GenericColumn, StringColumn, NumberColumn, DateTimeColumn, BooleanColumn
 } from './gssColumnCreator';
 
 /*
@@ -10,15 +10,19 @@ export default class GssColumn {
     return GenericColumn.create(values);
   }
 
-  static str(values: ConfAbstractColumn) {
-    return StringColumn.create(values);
+  static bool(values: ConfAbstractColumn) {
+    return BooleanColumn.create(values);
+  }
+
+  static datetime(values: ConfAbstractColumn) {
+    return DateTimeColumn.create(values);
   }
 
   static num(values: ConfAbstractColumn) {
     return NumberColumn.create(values);
   }
 
-  static datetime(values: ConfAbstractColumn) {
-    return DateTimeColumn.create(values);
+  static str(values: ConfAbstractColumn) {
+    return StringColumn.create(values);
   }
 }

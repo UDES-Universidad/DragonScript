@@ -24,20 +24,20 @@ export abstract class AbstractColumn {
   public column?: number;
 
   public defaultValue?: any;
-  
+
   public functionValidators?: ((value: any) => any)[];
-  
+
   /*
-   * Checks that a vuele meets the data required to be stored.
+   * Checks that a value meets the data required to be stored.
    * */
   public abstract validate(value: any): any;
-  
+
   /*
    * Return a value as a string, this is used
    * in filter method from GssObjectsCreator.
    * */
   public abstract chain(value: any): any;
-  
+
   /*
    * Assigns values to column properties. 
    * */
@@ -71,7 +71,7 @@ export abstract class AbstractColumn {
  * Generic column.
  * */
 export class GenericColumn extends AbstractColumn {
-  static create(values: ConfAbstractColumn): GenericColumn {
+  public static create(values: ConfAbstractColumn): GenericColumn {
     return new GenericColumn().asignValues(values);
   }
   
@@ -84,7 +84,7 @@ export class GenericColumn extends AbstractColumn {
  * String column.
  * */
 export class StringColumn extends AbstractColumn {
-  static create(payload: {}): StringColumn {
+  public static create(payload: {}): StringColumn {
     return new StringColumn().asignValues(payload);
   }
 
@@ -92,7 +92,7 @@ export class StringColumn extends AbstractColumn {
     if (this.required && !value) throw new Error(`Fn: StringColumn, column: ${this.column}, value is required`);
     if (!value && this.defaultValue) return this.defaultValue;
     if (this.forceConvertion) return String(value);
-    if (typeof value !== 'string') throw new Error(`Column ${this.column} must be a string but it receibed a ${typeof value}.`);
+    if (typeof value !== 'string') throw new Error(`Column ${this.column} must be a string but it receibed a ${typeof value}, value: ${value}`);
     return this._extraValidators(value, this.functionValidators);
   }
 
@@ -105,7 +105,7 @@ export class StringColumn extends AbstractColumn {
  * Number column.
  * */
 export class NumberColumn extends AbstractColumn {
-  static create(payload: {}): NumberColumn {
+  public static create(payload: {}): NumberColumn {
     return new NumberColumn().asignValues(payload);
   }
   
@@ -117,12 +117,12 @@ export class NumberColumn extends AbstractColumn {
     if (this.required && !value) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
     if (!value && this.defaultValue) return this.defaultValue;
     if (this.forceConvertion) return Number(value);
-    if (typeof value !== 'number') throw new Error(`Column ${this.column} must be a number but it receibed a ${typeof value}.`);
+    if (typeof value !== 'number') throw new Error(`Column ${this.column} must be a number but it receibed a ${typeof value}, value: ${value}`);
     return value;
   }
 
   public chain(value: number | string): string {
-    return `${typeof value === 'string' && !value ? '""' : value }`;
+    return `${typeof value === 'string' && !value ? '""' : value}`;
   }
 }
 
@@ -134,7 +134,7 @@ export class DateTimeColumn extends AbstractColumn {
 
   autoNow: boolean = false;
 
-  static create(payload: {}): DateTimeColumn {
+  public static create(payload: {}): DateTimeColumn {
     return new DateTimeColumn().asignValues(payload);
   }
 
@@ -156,5 +156,29 @@ export class DateTimeColumn extends AbstractColumn {
 
   public chain(value: Date | string): string {
     return `new Date(${value})`;
+  }
+}
+
+/*
+ * Boolean column
+ * */
+export class BooleanColumn extends AbstractColumn {
+  public static create(payload: {}): BooleanColumn {
+    return new BooleanColumn().asignValues(payload);
+  }
+
+  public validate(value: boolean | string | number): boolean {
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'number') return Boolean(value);
+    if (typeof value === 'string') {
+      if (value === 'false') return false;
+      if (value) return true;
+      if (value === '') return false;
+    }
+    throw new Error(`Column ${this.column} must be a string but it receibed a ${typeof value}, value: ${value}`);
+  }
+
+  public chain(value: boolean): string {
+    return String(value);
   }
 }

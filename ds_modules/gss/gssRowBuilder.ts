@@ -37,6 +37,18 @@ export class GssRow {
   get data(): any[] {
     return this._data.slice(0);
   }
+  
+  /**
+   * Return data as object.
+   * */
+  get dataAsObj(): {} {
+    const obj = {}
+    this._data.forEach((el, index) => {
+      const key = this._columnsMap[index];
+      obj[key] = el;
+    });
+    return obj;
+  }
 
   /*
    * Sets new data.

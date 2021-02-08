@@ -28,10 +28,18 @@ interface ConfMayorDataGetters {
 }
 
 /*
+ * Interface for rowGenerator.
+ * */
+interface ConfRowGenerator {
+  rowNumber?: number;
+  cicles: number;
+  reverse: number;
+}
+
+/*
  * Interface for geAll method.
  * */
 interface ConfGetAll extends ConfMayorDataGetters {
-  generator: boolean;
 }
 
 /*
@@ -139,24 +147,6 @@ export default class GssObjectsCreator {
   }
 
   /*
-   * Gets data from Spreadsheet table and return it as a generator.
-   * This method allows return most recent data from table.
-   * */
-  private *_RowGenerator(indexes: number[]) {
-    for (const index of indexes) {
-      const data = this._sheet.getRange(
-        index, 1, 1, this._sheet.getLastColumn(),
-      ).getValues();
-      const row = this._createRow({
-        row: index,
-        data: data && data.length > 0 ? data[0] : Array(this._table.length).fill(''),
-      });
-      this._rows.push(row);
-      yield row;
-    }
-  }
-
-  /*
    * Returns a validator, it is used to specify 
    * that the data to save is the correct data type.
    * */
@@ -199,6 +189,45 @@ export default class GssObjectsCreator {
   }
 
   /*
+   * Gets data from Spreadsheet table and return it as a generator.
+   * This method allows return most recent data from table.
+   * */
+  public *rowGenerator(conf: ConfRowGenerator) {
+    let loop = 0;
+    let index = 0;
+    const rowNumber = conf && 'rowNumber' in conf ? conf.rowNumber : 2;
+    const reverse = conf && 'reverse' in conf ? conf.reverse : false;
+    let cicles;
+
+    if (conf && 'rowNumber' in conf && 'cicles' in conf) {
+      cicles = conf.cicles;
+    }
+    if (conf && 'rowNumber' in conf && !('cicles' in conf)) {
+      cicles = 'reverse' in conf
+        ? conf.rowNumber - 1
+        : (this._sheet.getLastRow() + 1) - conf.rowNumber;
+    }
+    if (!conf) {
+      cicles = this._sheet.getLastRow() - 1;
+    }
+    while (loop < cicles) {
+      if (reverse) {
+        index = rowNumber - loop;
+      } else {
+        index = rowNumber + loop;
+      }
+      const data = this._sheet.getRange(
+        index, 1, 1, this._sheet.getLastColumn()
+      ).getValues()[0];
+      yield this._createRow({
+        row: index,
+        data,
+      });
+      loop += 1;
+    }
+  }
+
+  /*
    * Return all data by two strategies:
    * 1. Brute: get all data of table as a snapshot and transforms 
    * it in to a array of GssRow.
@@ -208,25 +237,13 @@ export default class GssObjectsCreator {
    * rows are saved in the property _rows.
    * */
   public getAll(conf?: ConfGetAll) {
-    const generator = conf && 'generator' in conf 
-      ? conf.generator 
-      : false;
-    if (generator) {
-      const lastRowTable = this._sheet.getLastRow() + 1;
-      let indexes = Array.from(new Array(lastRowTable).keys()).slice(2);
-      if (conf) {
-        if ('slice' in conf && conf.slice.length > 0) indexes = indexes.slice(...conf.slice);
-        if ('reverse' in conf && conf.reverse) indexes.reverse();
-      }
-      return this._RowGenerator(indexes);
-    }
-    let rows = this._retrieveDataFromTable(); 
+    let rows = this._retrieveDataFromTable();
     if (conf) {
       if('slice' in conf && conf.slice.length > 0) rows = rows.slice(...conf.slice);
       if ('reverse' in conf && conf.reverse) rows.reverse();
     }
     return this._ObjectsCreator(rows);
-  } 
+  }
 
   /*
    * Gets data by specific column-value.
@@ -246,11 +263,11 @@ export default class GssObjectsCreator {
     }
     indexes.forEach(i => {
       const row = this._rows[i];
-      if (eval(statement)) results.push(row);      
+      if (eval(statement)) results.push(row);
     });
     return this._ObjectsCreator(results);
   }
-  
+
   /*
    * Gets data from sheet by a custom range, 
    * and it can search terms.
