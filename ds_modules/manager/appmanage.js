@@ -46,11 +46,12 @@ class AppManageProto extends AbstractArgument {
   }
 
   processor() {
+    // Path to dragonScript.json
     const configFile = path.join(this.currentExecDir, this.configFile);
     const configFileData = JSON.parse(fs.readFileSync(configFile));
     const claspFile = path.join(this.currentExecDir, '.clasp.json');
     if (this.argsv.add_module) {
-      this.argsv.add_module.forEach((m) =>{
+      this.argsv.add_module.forEach((m) => {
         const moduleName = m.trim();
         fs.copySync(
           path.join(this.baseDir, this.dsModulesName, moduleName),
@@ -66,7 +67,7 @@ class AppManageProto extends AbstractArgument {
         fs.removeSync(path.join(this.currentExecDir, this.dsModulesName, moduleName));
       });
     } else if (this.argsv.pull) {
-      if (!this.configFileData.gasId) {
+      if (!configFileData.gasId) {
         console.log('There is no GAS Id to pull data correctly.'
           + '\nAdd an GAS Id in dragonScript.json.');
         return;

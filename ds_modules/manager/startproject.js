@@ -122,7 +122,7 @@ class StartProjectProto extends AbstractArgument {
         if (!fs.existsSync(appDir)) fs.mkdirSync(appDir);
         fs.writeFileSync(configFile, JSON.stringify(configData, null, 4));
         if (dsModules && dsModules.length > 0) {
-          fs.mkdirSync(dsModulesNewProject);
+          if (!fs.existsSync(dsModulesNewProject)) fs.mkdirSync(dsModulesNewProject);
           fs.copySync(
             path.join(dirModules, 'interfaces.ts'),
             path.join(dsModulesNewProject, 'interfaces.ts'),
@@ -142,10 +142,10 @@ class StartProjectProto extends AbstractArgument {
           path.join(this.baseDir, f),
           path.join(projectPath, f),
         ));
-        fs.copySync(
-          path.join(this.baseDir, 'app'),
-          appDir,
-        );
+        // fs.copySync(
+        //   path.join(this.baseDir, 'app'),
+        //   appDir,
+        // );
         process.chdir(projectPath);
         // this.commands.forEach((c) => execSync(c));
         const claspNewProject = path.join(projectPath, '.clasp.json');
