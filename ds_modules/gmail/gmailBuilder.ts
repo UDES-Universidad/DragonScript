@@ -36,8 +36,8 @@ class GmailBuilder {
     let txtWithReplaces = txt.substr(0);
     Object.entries(datas).forEach(el => {
       txtWithReplaces = txtWithReplaces.replace(
-        new RegExp(`##${el[0]}##`, 'g'), 
-        String(el[1])
+        new RegExp(`##${el[0]}##`, 'g'),
+        String(el[1]),
       );
     });
     return txtWithReplaces;

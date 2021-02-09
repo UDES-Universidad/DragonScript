@@ -198,9 +198,10 @@ export default class GssObjectsCreator {
     const rowNumber = conf && 'rowNumber' in conf ? conf.rowNumber : 2;
     const reverse = conf && 'reverse' in conf ? conf.reverse : false;
     let cicles;
-
     if (conf && 'rowNumber' in conf && 'cicles' in conf) {
-      cicles = conf.cicles;
+      cicles = conf.cicles <= this._sheet.getLastRow()
+        ? conf.cicles
+        : this._sheet.getLastRow();
     }
     if (conf && 'rowNumber' in conf && !('cicles' in conf)) {
       cicles = 'reverse' in conf
