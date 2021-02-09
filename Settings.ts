@@ -1,24 +1,22 @@
-namespace SETTINGS {
-    export const DEFAULT_NAMESHEET = 'New_Sheet'
+/**
+ * Settings
+ * */
 
-    // APP DATA
-    // ----------------------------------
-    export const DEBUG = true;
+ScriptProperties.setProperties({
+  bookUrl: '',
+  sheetName: '',
+  debug: '0',
+  argumentRoute: 'path',
+  appName: '',
+  urlDev: '',
+  urlProd: '',
+  favicon: 'https://udes.edu.mx/wp-content/uploads/2016/08/favicon.png',
+  notAuthPath: '',
+  defaultPath: '',
+  firebaseUrl: '',
+  firebaseSecret: '',
+});
 
-    export const APP_NAME = '';
+const SETTINGS = PropertiesService.getScriptProperties();
 
-    export const URL_DEV = '';
-
-    export const URL_PROD = '';
-
-    export const FAVICON = "https://udes.edu.mx/wp-content/uploads/2016/08/favicon.png";
-
-    export const NOT_AUTH_PATH = "";
-    export const DEFAULT_PATH = "Templates/index"
-
-    // Firebase 
-    // ------------------------------------
-    export const FIREBASE_URL = '';
-    export const FIREBASE_SECRET = '';
-
-}
+export default SETTINGS;
