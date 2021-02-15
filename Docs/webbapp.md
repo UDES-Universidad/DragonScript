@@ -56,7 +56,7 @@ A urls functions is needed declared in any place of project, but is a good pract
       paths.addRoute({
         name: 'helloWorld',
         path: 'hello',
-        http: helloWorld,
+        view: helloWorld,
       });
     };
 
@@ -100,7 +100,7 @@ To create a new route we need to use a __Router__ class. All routes that you cre
 
 ### Add routes
 
-With a __Rauter__ class you can create a new routes and get and absolute path from a resource by its name.
+With a __Rauter__ class you can create a new routes and get an absolute path from a resource by its name.
 
 To create a single route:
   

@@ -31,9 +31,9 @@ interface ConfMayorDataGetters {
  * Interface for rowGenerator.
  * */
 interface ConfRowGenerator {
-  rowNumber?: number;
-  cicles: number;
-  reverse: number;
+  startAtRow?: number;
+  rowsNumber?: number;
+  reverse?: number;
 }
 
 /*
@@ -195,27 +195,27 @@ export default class GssObjectsCreator {
   public *rowGenerator(conf: ConfRowGenerator) {
     let loop = 0;
     let index = 0;
-    const rowNumber = conf && 'rowNumber' in conf ? conf.rowNumber : 2;
+    const startAtRow = conf && 'startAtRow' in conf ? conf.startAtRow : 2;
     const reverse = conf && 'reverse' in conf ? conf.reverse : false;
-    let cicles;
-    if (conf && 'rowNumber' in conf && 'cicles' in conf) {
-      cicles = conf.cicles <= this._sheet.getLastRow()
-        ? conf.cicles
+    let rowsNumber;
+    if (conf && 'startAtRow' in conf && 'rowsNumber' in conf) {
+      rowsNumber = conf.rowsNumber <= this._sheet.getLastRow()
+        ? conf.rowsNumber
         : this._sheet.getLastRow();
     }
-    if (conf && 'rowNumber' in conf && !('cicles' in conf)) {
-      cicles = 'reverse' in conf
-        ? conf.rowNumber - 1
-        : (this._sheet.getLastRow() + 1) - conf.rowNumber;
+    if (conf && 'startAtRow' in conf && !('rowsNumber' in conf)) {
+      rowsNumber = 'reverse' in conf
+        ? conf.startAtRow - 1
+        : (this._sheet.getLastRow() + 1) - conf.startAtRow;
     }
     if (!conf) {
-      cicles = this._sheet.getLastRow() - 1;
+      rowsNumber = this._sheet.getLastRow() - 1;
     }
-    while (loop < cicles) {
+    while (loop < rowsNumber) {
       if (reverse) {
-        index = rowNumber - loop;
+        index = startAtRow - loop;
       } else {
-        index = rowNumber + loop;
+        index = startAtRow + loop;
       }
       const data = this._sheet.getRange(
         index, 1, 1, this._sheet.getLastColumn()
