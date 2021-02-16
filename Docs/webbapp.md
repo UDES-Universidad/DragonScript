@@ -155,4 +155,12 @@ Also you can do it this in a template:
       </a>
     ...
 
+## Utils
 
+This module includes this functions:
+
+__includes(filename: string)__: This function allows import html code in other html file at the momento of evaluate.
+
+Params:
+  
+  - filename (string): filename.
