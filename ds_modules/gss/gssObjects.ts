@@ -57,7 +57,11 @@ interface ConfGetBySheetRange extends ConfMayorDataGetters {
   search?: {};
 }
 
-/**/
+/**
+ * It is used for row creation.
+ * @param data (any[]): dato for row.
+ * @param row (number): row number.  
+ * */
 interface ConfLocalCreationRow {
   data: any[];
   row?: number;
@@ -88,10 +92,19 @@ export default class GssObjectsCreator {
     if (conf.rows && conf.rows.length > 0) this._rows = conf.rows;
   }
 
+  /**
+   * Returns an GssRow[].
+   * */
   get Rows() {
     return this._rows;
   }
-
+  
+  /**
+   * Creates an GssObjectsCreator instance.
+   * @param rows (GssRow[]): array of GssRow instances, this array 
+   * will be used to avoid bringing back the data from 
+   * the spreadsheet. 
+   * */
   private _ObjectsCreator(rows: GssRow[]) {
     return new GssObjectsCreator({
       columnsMap: this._columnsMap,
@@ -101,8 +114,12 @@ export default class GssObjectsCreator {
     })
   }
 
-  /*
+  /**
    * Row creator
+   * @param dataforRow (ConfLocalCreationRow): is an configuration
+   * object made up of:
+   * @param data (any[]): dato for row.
+   * @param row (number): row number.
    * */
   private _createRow(dataforRow: ConfLocalCreationRow) {
     let conf: ConfParamsGssRow = {
@@ -154,6 +171,10 @@ export default class GssObjectsCreator {
     return this._table[column];
   }
 
+  /**
+   * Save a row values to Sheet.
+   * @param row: instance of gssRow.
+   * */
   public saveRow(row: GssRow) {
     const dataToSave = row.data.map((value, index) => this._validator(index).validate(value));
     if (row.row) {
@@ -164,19 +185,22 @@ export default class GssObjectsCreator {
     }
   }
 
-  /*
-   * Creates a blank row.
+  /**
+   * Creates a blank row. Returns a GssRow instance.
+   * @param data (any[]): data to new row.
    * */
-  public newRow() {
+  public newRow(data?: any[]): GssRow {
     const row = this._createRow({
       data: Array(this._table.length).fill(''),
     });
+    if (data && data.length > 0) row.data = data;
     this._rows.push(row);
     return row;
   }
 
-  /*
+  /**
    * Gets a row values by its number.
+   * @param rowNumber (number): row number.
    * */
   public getRowByNumber(rowNumber: number): GssRow {
     const range = this._sheet
@@ -188,9 +212,13 @@ export default class GssObjectsCreator {
     });
   }
 
-  /*
+  /**
    * Gets data from Spreadsheet table and return it as a generator.
    * This method allows return most recent data from table.
+   * @param conf (ConfRowGenerator): is made up of:
+   * @param startAtRow: row where will start the iteration.
+   * @param rowNumber: how many rows will be iterate.
+   * @param reverse: if the iteration will be in reverse.
    * */
   public *rowGenerator(conf: ConfRowGenerator) {
     let loop = 0;

@@ -95,6 +95,7 @@ export default class GssCreator implements CreatorApp {
 
   /**
    * Get and array of strings with the names of sheets.
+   * Returns an array with the sheet names.
    * */
   public sheetNames(): string[] {
     if (this._app) return this._app?.getSheets().map((sheet) => sheet.getName());
@@ -104,6 +105,9 @@ export default class GssCreator implements CreatorApp {
   // Object functions
   // ------------------------------------------------------------
 
+  /**
+   * This method handle all about data in spreadsheet.
+   * */
   public Objects(): GssObjectsCreator {
     return new this._objectsModel({
       sheet: this._sheet,
@@ -116,7 +120,7 @@ export default class GssCreator implements CreatorApp {
   // ------------------------------------------------------------
 
   /**
-   * Creates a copy of document and return a GDOC object.
+   * Creates a copy of document and return a GssCreator instance.
    * @param name (string): name to new document.
    * @param folderId: (string): folder id to save new document.
    * */
