@@ -9,6 +9,7 @@ const Settings = {
     'gforms',
     'webapp',
     'firebase',
+    'scriptprops',
   ],
 };
 

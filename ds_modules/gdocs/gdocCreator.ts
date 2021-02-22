@@ -1,10 +1,23 @@
 import CreatorApp from '../interfaces';
 
+// Interfaces
+interface ConfExportDoc {
+  mimeType: string;
+  name: string;
+  folderId?: string;
+  onlyBlob?: boolean;
+  accessType?: GoogleAppsScript.Drive.Access;
+  permissionType?: GoogleAppsScript.Drive.Permission;
+}
+
+
 /**
  * This class corresponds to Google Docs.
  * */
 export default class GdocCreator implements CreatorApp {
-  private _app: GoogleAppsScript.Document.Document;
+  private _app?: GoogleAppsScript.Document.Document;
+
+  public marks: string = '##';
 
   get app(): GoogleAppsScript.Document.Document {
     return this._app;
@@ -52,7 +65,8 @@ export default class GdocCreator implements CreatorApp {
       newFile = folder
         ? driveFile.makeCopy(docName, folder)
         : driveFile.makeCopy(docName);
-      const newDoc = new GdocCreator(newFile.getId());
+      const newDoc = new GdocCreator();
+      newDoc.connect(newFile.getId());
       return newDoc;
     }
     throw new Error('There is not an id document.');
@@ -65,11 +79,17 @@ export default class GdocCreator implements CreatorApp {
    * por el valor de la clave dentro den un objeto.
    * @param datas (object)
    * */
-  public replace(datas: {}): void {
-    if (Object.keys(datas).length > 0) {
-      Object.entries(datas).forEach((el) => {
-        this.body.replaceText(`##${el[0]}##`, String(el[1]));
-      });
+  public replace(datas: {}, forceWrite: boolean = false): void {
+    const entries = Object.entries(datas);
+    const body = this._app.getBody();
+    for (const el of entries) {
+      const key = `${this._marks}${el[0]}${this._marks}`;
+      body.replaceText(key, String(el[1]));
+    }
+    if (forceWrite) {
+      const id = this._app?.getId();
+      this._app?.saveAndClose();
+      this.connect(id);
     }
   }
 
@@ -83,4 +103,47 @@ export default class GdocCreator implements CreatorApp {
     const fileFromDrive = DriveApp.getFileById(this.id);
     fileFromDrive.setSharing(access, permission);
   }
+
+  /**
+   * Expots a document according to its MIME type.
+   * Returns a blob if onlyBlob is setted to true.
+   * If folderId contains an id, this method returns
+   * a File instance.
+   * @param conf (ConfExportDoc) contains:
+   * @param mimeType: string;
+   * @param name: string;
+   * @param folderId?: string;
+   * @param onlyBlob?: boolean;
+   * @param accessType: GoogleAppsScript.Drive.Access;
+   * @param permissionType: GoogleAppsScript.Drive.Permission;
+   * */
+  public exportDoc(conf: ConfExportDoc) {
+    const blob = DriveApp.getFileById(this.id)
+      .getAs(conf.mimeType);
+    blob.setName(conf.name);
+    if ('onlyBlob' in conf && conf.onlyBlob) return blob;
+    let folder;
+    if ('folderId' in conf && conf.folderId) {
+      folder = DriveApp.getFolderById(conf.folderId);
+      const newDoc = folder.createFile(blob);
+      if ('accessType' in conf
+        && conf.accessType
+        && 'permissionType' in conf
+        && conf.permissionType) {
+        newDoc.setSharing(conf.accessType, conf.permissionType);
+      }
+      return newDoc;
+    }
+
+    return false;
+  }
+
+  /**
+   * Send file to trash.
+   * */
+  public setTrashed(trashed: boolean) {
+    DriveApp.getFileById(this._app?.getId()).setTrashed(trashed);
+  }
 }
+
+

@@ -223,8 +223,12 @@ export default class GssObjectsCreator {
   public *rowGenerator(conf: ConfRowGenerator) {
     let loop = 0;
     let index = 0;
-    const startAtRow = conf && 'startAtRow' in conf ? conf.startAtRow : 2;
-    const reverse = conf && 'reverse' in conf ? conf.reverse : false;
+    const startAtRow = conf && 'startAtRow' in conf 
+      ? conf.startAtRow 
+      : 2;
+    const reverse = conf && 'reverse' in conf 
+      ? conf.reverse 
+      : false;
     let rowsNumber;
     if (conf && 'startAtRow' in conf && 'rowsNumber' in conf) {
       rowsNumber = conf.rowsNumber <= this._sheet.getLastRow()
@@ -246,7 +250,7 @@ export default class GssObjectsCreator {
         index = startAtRow + loop;
       }
       const data = this._sheet.getRange(
-        index, 1, 1, this._sheet.getLastColumn()
+        index, 1, 1, this._sheet.getLastColumn(),
       ).getValues()[0];
       yield this._createRow({
         row: index,

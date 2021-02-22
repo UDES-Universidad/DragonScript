@@ -17,7 +17,7 @@ class GformCreator {
     return this._app.getEditUrl();
   }
 
-  get App (): GoogleAppsScript.Forms.Form {
+  get App(): GoogleAppsScript.Forms.Form {
     return this._app;
   }
 
@@ -56,9 +56,9 @@ class GformCreator {
     }
     return questions;
   }
-  
+
   /**
-   * Get form items by type
+   * Get form items by type.
    * */
   public getItemByType(itemType: GoogleAppsScript.Forms.ItemType) {
     const itemsInfo = this.itemsInfo();
@@ -66,7 +66,7 @@ class GformCreator {
   }
 
   /**
-   * Get a item by a substring 
+   * Get a item by a substring.
    * */
   public getItemBySubString(substring: string, property: 'title' | 'helpText') { 
     const itemsInfo = this.itemsInfo();
@@ -74,7 +74,11 @@ class GformCreator {
   }
 }
 
-
-export default const GformClient = (urlOrId: string): GformCreator => {
-  return new GformCreator(urlOrId);
+/**
+ * GForm Client.
+ * */
+export default class GformClient {
+  public static form(urlOrId: string): GformCreator {
+    return new GformCreator(urlOrId);
+  }
 }

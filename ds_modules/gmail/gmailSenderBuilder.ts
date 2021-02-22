@@ -141,7 +141,7 @@ export default class GmailSenderBuilder {
   /**
    * Send a message.
    * */
-  public send(to: string, context:{}) {
+  public send(to: string, context:{}, attachments?: any[]) {
     let htmlBody;
     const subject = this._replaceMarks(this.subject, context);
     if (this.evaluateMode) {
@@ -156,6 +156,17 @@ export default class GmailSenderBuilder {
     };
     if (this._attachments.length > 0) {
       payload.attachments = this._attachments;
+    }
+    if (attachments && attachments.length > 0) {
+      if ('attachments' in payload 
+        && payload.attachments.length > 0) {
+        payload.attachments = [
+          ...payload.attachments,
+          ...attachments,
+        ];
+      } else {
+        payload.attachments = attachments;
+      }
     }
     MailApp.sendEmail(payload);
   }

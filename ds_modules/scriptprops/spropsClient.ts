@@ -1,62 +1,37 @@
-/*
- * Manage Script Properties.
+import SscriptPropsFromSheet from './sscriptprops';
+
+/**
+ * ScriptProps Client
  * */
-
-interface ssScriptPropsInterface {
-  name: string;
-  range?: number[];
-}
-
-interface setPropsByPositionInter {
-  names: string[];
-  startRow: number;
-  column: number,
-}
-
-class ssScriptProps {
-  private _sheet: GoogleAppsScript.Spreadsheet.Sheet;
-
-  constructor (sheet: GoogleAppsScript.Spreadsheet.Sheet) {
-    this._sheet = sheet;
+export default class ScriptPropsClient {
+  public static ssScriptProps(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
+    return new SscriptPropsFromSheet(sheet);
   }
-  
-  /*
-   * Sets props by position in Sheet.
-   * */
-  public setPropsByPosition(conf: setPropsByPositionInter) {
-    let row = conf.startRow;
-    for (const name of conf.names) {
-      const value = this._sheet.getRange(
-        row, conf.column
-      ).getValue();
-      ScriptProperties.setProperty(
-        name,
-        JSON.stringify(value),
-      );
-      row += 1;
+
+  public static getProp(name: string) {
+    const data = ScriptProperties.getProperty(name);
+    return data ? JSON.parse(data) : null;
+  }
+
+  public static setProp(name: string, value: any) {
+    ScriptProperties.setProperty(name, JSON.stringify(value));
+  }
+
+  public static setProps(data: {}) {
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        const value = data[key];
+        ScriptPropsClient.setProp(key, value);
+      }
     }
   }
-  
-  /*
-   * Set a prop.
-   * */
-  public setProp = (conf:ssScriptPropsInterface) {
-    const range = this._sheet.getRange(...conf.range);
-    let values;
-    if (conf.range?.length === 2) values = range?.getValue();
-    if (conf.range?.length === 4) values = range?.getValues();
-    ScriptProperties.setProperty(
-      conf.name,
-      JSON.stringify(values),
-    );
+
+  public static getProps() {
+    const keys = ScriptProperties.getKeys();
+    const obj = {};
+    keys.forEach((key: string) => {
+      obj[key] = ScriptPropsClient.getProp(key);
+    });
+    return obj;
   }
-}
-
-export const getProp = (name: string) => {
-  const data = ScriptProperties.getProperty(name);
-  return data ? JSON.parse(data) : null;
-};
-
-export const scriptPropsClient = (sheet: GoogleAppsScript.Spreadsheet.Sheet): ssScriptProps => {
-  return new ssScriptProps(sheet); 
 }

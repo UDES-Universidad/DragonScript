@@ -29,6 +29,10 @@ export default class GssCreator implements CreatorApp {
     return <GoogleAppsScript.Spreadsheet.Sheet> this._sheet;
   }
 
+  get columnsVerboseNames(): string[] {
+    return this._table.map((el) => el.verboseName);
+  }
+
   // Builder functions
   // ------------------------------------------------------------
 
