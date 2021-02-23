@@ -1,10 +1,8 @@
 /**
  * Server module.
  * */
-
+import webAppSettings from './defaultSettings';
 import Router from './router';
-import SETTINGS from '../../Settings';
-//import urls from '../../GASwebAppTest/urls'
 
 // Interfaces
 // ------------------------------------------------------------
@@ -23,10 +21,13 @@ export interface RequestGetInterface {
 class Server {
   private static _router = Router();
 
+  /**
+   * Return a view.
+   * */
   public static response(req: RequestGetInterface) {
-    const argumentRoute = SETTINGS.getProperty('argumentRoute');
-    const path = req.parameter[argumentRoute];
-    const debug = Number(ScriptProperties.getProperty('debug'));
+    const props = webAppSettings();
+    const path = req.parameter[props.argumentRoute];
+    const debug = Number(props.debug);
     if (debug) {
       urls();
       return this._router.getRouteByPath(path).view(req);
@@ -39,6 +40,9 @@ class Server {
     }
   }
 
+  /**
+   * If something wrong happens.
+   * */
   public static sendError(code: number, error:string) {
     return ContentService.createTextOutput(JSON.stringify({
       status: code,

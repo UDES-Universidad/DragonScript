@@ -5,6 +5,8 @@
  * html file at the momento of evaluate.
  * @param filename (string): filename.
  * */
-const include = (filename: string) => HtmlService
-  .createHtmlOutputFromFile(filename)
-  .getContent();
+function include(filename: string) {
+  return HtmlService
+    .createHtmlOutputFromFile(filename)
+    .getContent();
+}

@@ -1,11 +1,7 @@
 /**
  * Router module.
  * */
-/**
- * Router module.
- * */
-
-import SETTINGS from '../../Settings';
+import webAppSettings from './defaultSettings';
 
 interface RouteInterface {
   name: string;
@@ -21,11 +17,13 @@ class RouterSingleton {
 
   private _routes:(RouteInterface | [string, RouteInterface[]])[] = [];
 
+  /**
+   * Get a RouterSingleton instance.
+   * */
   public static getInstance() {
     if (!RouterSingleton.instance) {
       RouterSingleton.instance = new RouterSingleton();
     }
-
     return RouterSingleton.instance;
   }
 
@@ -59,12 +57,13 @@ class RouterSingleton {
 
   /**
    * Return url web app depending on whether a
-   * SETTINGS.debug is in 0 (false) or 1 (true).
+   * ScriptPropertiescript.debug is in 0 (false) or 1 (true).
    * */
   public getScriptUrl() {
-    const debug = Number(SETTINGS.getProperty('debug'));
-    if (debug === 1) return SETTINGS.getProperty('urlDev');
-    return SETTINGS.getProperty('urlProd');
+    const props = webAppSettings();
+    const debug = Number(props.debug);
+    if (debug === 1) return props.urlDev;
+    return props.urlProd;
   }
 
   /**
@@ -82,13 +81,12 @@ class RouterSingleton {
   }
 
   /**
-   * Add complex route.
+   * Add a set of routes.
    * */
   public addGroupRoutes(routes: [string, RouteInterface[]]) {
     if (Array.isArray(routes)) {
-      let wrong = false;
       if (typeof routes[0] === 'string') {
-        routes[1].forEach(i => {
+        routes[1].forEach((i) => {
           if (!i.name && !i.path && i.view) throw new Error('Routes are incompletes');
         });
         this._routes.push(routes);
@@ -129,22 +127,21 @@ class RouterSingleton {
   /**
    * Get a route by path.
    * */
-  public getRouteByPath(path: string): RouteInterface {
-    let Path = path;
-    if (!path) Path = '';
-    if (path === '/') Path = '';
+  public getRouteByPath(thePath: string): RouteInterface {
+    let path = thePath || '';
+    if (path === '/') path = '';
     for (const item of this._routes) {
       if (Array.isArray(item)) {
         for (const route of item[1]) {
           const pathBuilded = this._joinPaths(
             [item[0], route.path],
           );
-          if (pathBuilded === Path) {
+          if (pathBuilded === path) {
             route.path = pathBuilded;
             return route;
           }
         }
-      } else if (item.path === Path) {
+      } else if (item.path === path) {
         return item;
       }
     }
@@ -155,7 +152,8 @@ class RouterSingleton {
    * Get an absolute route by the name.
    * */
   public getUrlByName(name: string) {
-    const routeArg = SETTINGS.getProperty('argumentRoute');
+    const props = webAppSettings();
+    const routeArg = props.argumentRoute;
     const route = this.getRouteByName(name);
     const urlBase = this.getScriptUrl();
     return `${urlBase}?${routeArg}=${route.path}`;

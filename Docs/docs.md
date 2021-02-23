@@ -19,7 +19,6 @@ In the DragonExample directory inner your project directory create two files: **
 ### Project structure
 
       DragonExample
-      ├── Settings.ts
       ├── ds_modules
       │   ├── interfaces.ts
       │   └── webapp
@@ -31,18 +30,6 @@ In the DragonExample directory inner your project directory create two files: **
       └── DragonExample
           ├── urls.ts
           └── https.ts
-
-### Settings.ts
-
-    const Settings = () => {
-      const scriptProperties = PropertiesService.getScriptProperties();
-      scriptProperties.setProperties({
-        'debug': '0',
-        'argumentRoute': 'path',
-        'urlProd': 'https://google.com/myScriptURL-production',
-        'urlDev': 'https://google.com/myScriptURL-dev',
-      });
-    }
 
 ### https.ts
 
@@ -74,7 +61,7 @@ A urls functions is needed declared in any place of project, but is a good pract
       paths.addRoute({
         name: 'helloWorld',
         path: 'hello',
-        view: helloWorld,
+        http: helloWorld,
       });
     };
 
@@ -117,7 +104,7 @@ To create a new route we need to use a **Router** class. All routes that you cre
 
 ### Add routes
 
-With a **Rauter** class you can create a new routes and get an absolute path from a resource by its name.
+With a **Rauter** class you can create a new routes and get and absolute path from a resource by its name.
 
 To create a single route:
 
@@ -172,128 +159,3 @@ Also you can do it this in a template:
         My link to another page.
       </a>
     ...
-
-## Utils
-
-This module includes this functions:
-
-**includes(filename: string)**: This function allows import html code in other html file at the momento of evaluate.
-
-Params:
-
-- filename (string): filename.
-
-# Modules
-
-## Server Module
-
-### class Server
-
-This module is a class that handle requests and redirect request GET or POST to correct route. By now only handles GET requests.
-
-#### response(req)
-
-This a static method of server that redirect to correct route according to value passed in path GET parameter.
-
-##### Parameters
-
-| Name  | Type                  | Description                   |
-| ----- | --------------------- | ----------------------------- |
-| `req` | `RequestGetInterface` | Contains a request parameters |
-
-RequestGetInterface:
-
-| Name            | Type            |
-| --------------- | --------------- |
-| `queryString`   | `string`        |
-| `contentLength` | `number`        |
-| `parameters`    | `{}`            |
-| `contextPath`   | `string`        |
-| `parameter`     | `string`        |
-| `method`        | `GET` or `POST` |
-
-### doGet(req: RequestGetInterface)
-
-Execute a Server.response that returns a route.
-
-### doPost()
-
-Not used yet.
-
-## Router Module
-
-### Router()
-
-#### Return
-
-Return a instance of `RouterSingleton`.
-
-### class RouterSingleton
-
-This class is a singleton that handles routes and "URLs". URLs is a metaphor because is not possible manipulate the URL of the script, so for emulate that manipulation we use a GET parameter called `path`.
-
-Its possible change
-
-#### addRoute(route)
-
-Add a route to router.
-
-##### Parameters
-
-| Name    | Type             |
-| ------- | ---------------- |
-| `route` | `RouteInterface` |
-
-###### RouteInterface
-
-| Name   | Type     | Description                                       |
-| ------ | -------- | ------------------------------------------------- |
-| `name` | `string` | Name to route.                                    |
-| `path` | `string` | Path to resource (my/resource/path).              |
-| `view` | `HTTP`   | HTTP function that returns a HTML, string or JSON |
-
-#### addGroupRoutes(routes)
-
-Add a set of routes.
-
-##### Parameters
-
-| Name     | Type                         | Description                                                                 |
-| -------- | ---------------------------- | --------------------------------------------------------------------------- |
-| `routes` | `[string, RouteInterface[]]` | The first item of array is the name of set, second item is a set of routes. |
-
-#### getInstance()
-
-This static function checks if a instance exists yet, if not creates a new instance.
-
-##### Return
-
-Returns a instance of singleton.
-
-#### getRouteByName(name)
-
-Get a route from name that can be used in two ways:
-
-1. **single** path name, for example: myRouteName.
-
-2. **group**: `groupName:routeName`, that is a set of routes.
-
-##### Parameters
-
-| Name   | Type     | Description |
-| ------ | -------- | ----------- |
-| `name` | `string` | Route name  |
-
-##### Return
-
-`RouteInterface`
-
-#### getRouteByPath(req)
-
-#### getScriptUrl()
-
-Return URL Web App depending on whether a ScriptProperties.debug is in 0 or 1.
-
-##### Return
-
-`String`

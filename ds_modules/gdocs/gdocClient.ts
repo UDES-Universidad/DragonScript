@@ -8,4 +8,3 @@ export default class GdocClient {
     return new GdocCreator().connect(urlOrId);
   }
 }
-
