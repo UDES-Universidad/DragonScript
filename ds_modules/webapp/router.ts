@@ -127,8 +127,8 @@ class RouterSingleton {
   /**
    * Get a route by path.
    * */
-  public getRouteByPath(thePath: string): RouteInterface {
-    let path = thePath || '';
+  public getRouteByPath(pathStr: string): RouteInterface {
+    let path = pathStr || '';
     if (path === '/') path = '';
     for (const item of this._routes) {
       if (Array.isArray(item)) {

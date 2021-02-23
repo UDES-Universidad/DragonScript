@@ -288,7 +288,19 @@ Get a route from name that can be used in two ways:
 
 `RouteInterface`
 
-#### getRouteByPath(req)
+#### getRouteByPath(pathStr)
+
+Get a route by path.
+
+##### Parameters
+
+| Name      | Type     | Description                   |
+| --------- | -------- | ----------------------------- |
+| `pathStr` | `string` | Path taken from GET argument. |
+
+##### Return
+
+`RouteInterface`
 
 #### getScriptUrl()
 
@@ -297,3 +309,17 @@ Return URL Web App depending on whether a ScriptProperties.debug is in 0 or 1.
 ##### Return
 
 `String`
+
+#### getUrlByName(name)
+
+Get an absolute route by the path name.
+
+##### Parameters
+
+| Name   | Type     | Description |
+| ------ | -------- | ----------- |
+| `name` | `string` | Path name.  |
+
+##### Return
+
+URL `string`
