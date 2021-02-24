@@ -145,6 +145,19 @@ Connects to Spreadsheet, if are not passed any parameter the function will try t
 
 ### makeCopy(name, folderId)
 
+Creates a spreadsheet copy.
+
+#### Parameters
+
+| Name       | Type     | Description                            |
+| ---------- | -------- | -------------------------------------- |
+| `name`     | `string` | New spreadsheet name.                  |
+| `folderId` | `string` | Folder where de new file will be saved |
+
+#### Return
+
+`GssCreator`
+
 ---
 
 ### Objects()
@@ -154,6 +167,19 @@ Returns a `GssObjectsCreator` that handles iterators and data in the sheet.
 #### Return
 
 `GssObjectsCreator`
+
+---
+
+### setPermissions(access, permission)
+
+Sets permissions to file.
+
+#### Parameters
+
+| Name         | Type                                | Description                                                                                      |
+| ------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `access`     | `GoogleAppsScript.Drive.Access`     | [See Google Documentation](https://developers.google.com/apps-script/reference/drive/access)     |
+| `permission` | `GoogleAppsScript.Drive.Permission` | [See Google Documentation](https://developers.google.com/apps-script/reference/drive/permission) |
 
 ---
 

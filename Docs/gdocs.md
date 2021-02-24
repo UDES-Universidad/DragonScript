@@ -92,23 +92,33 @@ Creates a GdocCreator instance.
 
 Return a GdocCreator instance.
 
+---
+
 ## GdocCreator
 
 ### app
 
 This is a getter that returns a GoogleAppsScript.Document.Document instance.
 
+---
+
 ### id
 
 Returns a id document (`string`).
+
+---
 
 ### body
 
 Returns a Google.document.body.
 
+---
+
 ### url
 
 Returns a url document (`string`).
+
+---
 
 ### connect(urlOrId)
 
@@ -121,6 +131,8 @@ Open a document target.
 #### Return
 
 Returns a `GoogleAppsScript.Document.Document` .
+
+---
 
 ### export(conf)
 
@@ -147,6 +159,8 @@ Exports document to MIME type.
 
 `blob || GoogleAppsScript.Drive.File`
 
+---
+
 ### makeCopy(name, folderId)
 
 Creates a document copy.
@@ -162,6 +176,8 @@ Creates a document copy.
 
 `GoogleAppsScript.Document.Document`.
 
+---
+
 ### replace(datas, forceWrite)
 
 Replaces a text marks in the text body.
@@ -172,6 +188,8 @@ Replaces a text marks in the text body.
 | ------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `data`       | `object`  | Data to be replaced. Keys must be the same as marks in the text, keys will be automatically wrapped between '##' and replaced in the body text by its value. |
 | `forceWrite` | `boolean` | Allows or avoids async document write changes                                                                                                                |
+
+---
 
 ### setPermissions(access, permission)
 
@@ -184,9 +202,7 @@ Handles about access and permission.
 | `access`     | `GoogleAppsScript.Drive.Access`     | [See Google Documentation](https://developers.google.com/apps-script/reference/drive/access)     |
 | `permission` | `GoogleAppsScript.Drive.Permission` | [See Google Documentation](https://developers.google.com/apps-script/reference/drive/permission) |
 
-#### Return
-
-`Void`
+---
 
 ### setTrashed(trashed)
 
@@ -197,3 +213,5 @@ Send file to trash.
 | Name      | Type      | Description                                            |
 | --------- | --------- | ------------------------------------------------------ |
 | `trashed` | `boolean` | true for send file to trash, false, to bring back file |
+
+---
