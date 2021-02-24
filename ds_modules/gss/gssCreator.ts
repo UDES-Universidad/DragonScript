@@ -14,19 +14,19 @@ export default class GssCreator implements CreatorApp {
   private _objectsModel = GssObjectsCreator;
 
   public get app(): GoogleAppsScript.Spreadsheet.Spreadsheet {
-    return <GoogleAppsScript.Spreadsheet.Spreadsheet> this._app;
+    return <GoogleAppsScript.Spreadsheet.Spreadsheet>this._app;
   }
 
   get url(): string {
-    return <string> this._app?.getUrl();
+    return <string>this._app?.getUrl();
   }
 
   get id(): string {
-    return <string> this._app?.getId();
+    return <string>this._app?.getId();
   }
 
   get sheet(): GoogleAppsScript.Spreadsheet.Sheet {
-    return <GoogleAppsScript.Spreadsheet.Sheet> this._sheet;
+    return <GoogleAppsScript.Spreadsheet.Sheet>this._sheet;
   }
 
   get columnsVerboseNames(): string[] {
@@ -37,7 +37,7 @@ export default class GssCreator implements CreatorApp {
   // ------------------------------------------------------------
 
   /**
-   * Connects to Spreadsheet, if are not passed any parameter 
+   * Connects to Spreadsheet, if are not passed any parameter
    * the function will try to connect with the current Spreadsheet,
    * in this case, it is assumed that the script is embedded.
    * @param urlOrId (string): URL or ID Spreadsheet.
@@ -54,7 +54,7 @@ export default class GssCreator implements CreatorApp {
   }
 
   /**
-   * Sets a sheet to work with it. If that sheet not exists 
+   * Sets a sheet to work with it. If that sheet not exists
    * the function will try to add it.
    * @param sheetName (string): Sheet name.
    * Returns GssCreator.
@@ -62,21 +62,28 @@ export default class GssCreator implements CreatorApp {
   public setSheet(sheetName: string): GssCreator {
     const sheetNames = this.sheetNames();
     if (sheetNames.indexOf(sheetName) > -1) {
-      this._sheet = <GoogleAppsScript.Spreadsheet.Sheet>
-        this._app?.getSheetByName(sheetName);
+      this._sheet = <GoogleAppsScript.Spreadsheet.Sheet>(
+        this._app?.getSheetByName(sheetName)
+      );
     } else {
       this._sheet = this._app?.insertSheet(sheetName);
     }
     return this;
   }
 
-  /*
-   * Set a columns.
+  /**
+   * Checks that the amount o columns in the sheet and
+   * in the columns passed as parameter matches. If not,
+   * throw an error. If all is well, creates a columns map.
+   * If none columns are passed as parameter, then it creates
+   * generic columns that are called cell + index
+   * (cell1, cell2, cell3, etc.).
+   * @param columns (AbstractColumn[]): columns representation.
    * */
-  public setTable(columns: AbstractColumn[]) {
+  public setTable(columns?: AbstractColumn[]) {
     if (columns && columns.length > 0) {
       this._table = columns;
-      if (this._table.length !== this._sheet.getLastColumn()) {
+      if (this._sheet && this._table.length !== this._sheet.getLastColumn()) {
         throw new Error(
           'Fn:gss/gssCreator.setTable. Error: Table length not corresponds with total columns in the spreadsheet'
         );
@@ -88,16 +95,17 @@ export default class GssCreator implements CreatorApp {
         index++;
       });
     } else {
-      Array.from(Array(this._sheet.getLastColumn()).keys())
-        .forEach((index) => {
-          const cell = `cell${index + 1}`;
-          this._table.push(GenericColumn.create({
+      Array.from(Array(this._sheet.getLastColumn()).keys()).forEach((index) => {
+        const cell = `cell${index + 1}`;
+        this._table.push(
+          GenericColumn.create({
             name: cell,
             verboseName: this._sheet.getRange(1, index + 1).getValue(),
-          }))
-          this._columnsMap[cell] = index;
-          this._columnsMap[index] = cell;
-        });
+          })
+        );
+        this._columnsMap[cell] = index;
+        this._columnsMap[index] = cell;
+      });
     }
     return this;
   }
@@ -107,8 +115,12 @@ export default class GssCreator implements CreatorApp {
    * Returns an array with the sheet names.
    * */
   public sheetNames(): string[] {
-    if (this._app) return this._app?.getSheets().map((sheet) => sheet.getName());
-    throw new Error('There is not assigned SpreadsheetApp.Spreadsheet in _app. Fn: CreatorApp.sheetNames');
+    if (this._app) {
+      return this._app?.getSheets().map((sheet) => sheet.getName());
+    }
+    throw new Error(
+      'There is not assigned SpreadsheetApp.Spreadsheet in _app. Fn: CreatorApp.sheetNames'
+    );
   }
 
   // Object functions
@@ -122,7 +134,7 @@ export default class GssCreator implements CreatorApp {
       sheet: this._sheet,
       table: this._table,
       columnsMap: this._columnsMap,
-    })
+    });
   }
 
   // Inherited functions
@@ -154,8 +166,10 @@ export default class GssCreator implements CreatorApp {
    * @param access (GoogleAppsScript.Drive.Access)
    * @param permission (GoogleAppsScript.Drive.Permission)
    * */
-  public setPermissions(access: GoogleAppsScript.Drive.Access,
-    permission: GoogleAppsScript.Drive.Permission) {
+  public setPermissions(
+    access: GoogleAppsScript.Drive.Access,
+    permission: GoogleAppsScript.Drive.Permission
+  ) {
     const fileFromDrive = DriveApp.getFileById(this.id);
     fileFromDrive.setSharing(access, permission);
   }

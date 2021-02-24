@@ -73,7 +73,7 @@ Now, lets fun. We will search all users with more than 25 years and convert them
 
 ## class gssClient
 
-Handles GssCreator.
+## Handles GssCreator.
 
 ### static create(conf)
 
@@ -97,6 +97,8 @@ Configures a GssCreator instance and return it.
 
 `GssCreator`
 
+---
+
 ## class gssCreator
 
 This class is in charge all about the handling of the sheet itself. It is returned by gssClient.create method.
@@ -105,17 +107,25 @@ This class is in charge all about the handling of the sheet itself. It is return
 
 Array of verbose names of columns.
 
+---
+
 ### id
 
 Spreadsheet ID.
+
+---
 
 ### url
 
 Spreadsheet URL.
 
+---
+
 ### sheet
 
 `GoogleAppsScript.Spreadsheet.Sheet`
+
+---
 
 ### connect(urlOrId)
 
@@ -130,6 +140,22 @@ Connects to Spreadsheet, if are not passed any parameter the function will try t
 #### Return
 
 `GssCreator`
+
+---
+
+### makeCopy(name, folderId)
+
+---
+
+### Objects()
+
+Returns a `GssObjectsCreator` that handles iterators and data in the sheet.
+
+#### Return
+
+`GssObjectsCreator`
+
+---
 
 ### setSheet(sheetName)
 
@@ -149,7 +175,38 @@ Sets a sheet to work with it. If that sheet not exists the function will try to 
 
 ### setTable(columns)
 
-Checks that the amount o columns in the sheet and in the columns passed as parameter matches.
+Checks that the amount o columns in the sheet and in the columns passed as parameter matches. If not, throw an error. If all is well, creates a columns map. If none columns are passed as parameter, then it creates generic columns that are called cell + index (cell1, cell2, cell3, etc.).
+
+#### Parameters
+
+| Name      | Type             | Description      |
+| --------- | ---------------- | ---------------- |
+| `columns` | `AbstractColumn` | Column interface |
+
+##### AbstractColumn
+
+| Name                  | Type                       | Description                                       |
+| --------------------- | -------------------------- | ------------------------------------------------- |
+| `name`                | ` string`                  | Column name                                       |
+| `verboseName?`        | ` string`                  | Verbose columna name                              |
+| `forceConvertion?`    | ` boolean`                 | Try to convert data type to the data type column  |
+| `required?`           | ` boolean`                 | If is required                                    |
+| `defaultValue?`       | ` any`                     | Value by default on save is none value is passed. |
+| `functionValidators?` | ` ((value: any) => any)[]` | Custom validators, must return `true`.            |
+
+#### Return
+
+`GssCreator`
+
+---
+
+### sheetNames()
+
+Returns a array with the names of all sheets in the spreadsheet.
+
+#### Return
+
+`string[]`
 
 ---
 
