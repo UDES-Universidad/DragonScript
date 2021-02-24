@@ -7,11 +7,14 @@ interface ConfParamsClient {
   table?: AbstractColumn[];
 }
 
-/*
- * Gss Client.
+/**
+ * GssClient
  * */
 export default class GssClient {
-  static create(conf: ConfParamsClient): GssCreator {
+  /*
+   * Return a GssCreator instance.
+   * */
+  public static create(conf: ConfParamsClient): GssCreator {
     return new GssCreator()
       .connect(conf.urlOrId)
       .setSheet(conf.sheetName)

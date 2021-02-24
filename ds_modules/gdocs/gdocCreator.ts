@@ -145,5 +145,3 @@ export default class GdocCreator implements CreatorApp {
     DriveApp.getFileById(this._app?.getId()).setTrashed(trashed);
   }
 }
-
-

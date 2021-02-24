@@ -20,8 +20,7 @@ This module manage data from a Sheet of Spreadsheet.
             ├── gssObjects.ts
             └── GssRowBuilder.ts
 
-
-Import a __gssClient__ and __gssColumnFactory__ in myModule/tables.ts to create a table. I recomend have a unique file for tables. __gssClient__ represents a one Sheet and __gssColumnFactory__ represents a column in your sheet.
+Import a **gssClient** and **gssColumnFactory** in myModule/tables.ts to create a table. I recomend have a unique file for tables. **gssClient** represents a one Sheet and **gssColumnFactory** represents a column in your sheet.
 
     import GssColumn from '../ds_modules/gss/gssColumnFactory';
     import GssClient from '../ds_modules/gss/gssClient';
@@ -54,7 +53,7 @@ Import a __gssClient__ and __gssColumnFactory__ in myModule/tables.ts to create 
     }
 
 Now, lets fun. We will search all users with more than 25 years and convert them to zombies. We create the myModule/zombies.ts file.
-    
+
     import mytableZombie from './tables'
 
     const createZombies = () => {
@@ -70,61 +69,140 @@ Now, lets fun. We will search all users with more than 25 years and convert them
       }
     }
 
-## gssCreator
+# Modules
+
+## class gssClient
+
+Handles GssCreator.
+
+### static create(conf)
+
+Configures a GssCreator instance and return it.
+
+#### Parameters
+
+| Name   | Type               | Description            |
+| ------ | ------------------ | ---------------------- |
+| `conf` | `ConfParamsClient` | Configuration instance |
+
+##### ConfParamsClient
+
+| Name        | Type               | Description                        |
+| ----------- | ------------------ | ---------------------------------- |
+| `urlOrId`   | `string`           | URL or ID Spreadsheet.             |
+| `sheetName` | `string`           | Sheet with which you work.         |
+| `table`     | `AbstractColumn[]` | Array of AbstractColumn instances. |
+
+##### Return
+
+`GssCreator`
+
+## class gssCreator
 
 This class is in charge all about the handling of the sheet itself. It is returned by gssClient.create method.
 
-__Objects__: handle data sheet, see more below.
+### columnsVerboseNames
 
-__sheetNames__: get the names of the others sheets in the same Spreadsheet.
+Array of verbose names of columns.
 
-__makeCopy__: Creates a copy of document and return a GssCreator instance.
-  
-  Params:
+### id
 
-  - access (GoogleAppsScript.Drive.Access)
-  - permission (GoogleAppsScript.Drive.Permission)
+Spreadsheet ID.
 
-__setPermissions__: Sets permissions to file.
+### url
 
-Params:
+Spreadsheet URL.
 
-  - name (string): name to new document.
-  - folderId: (string): folder id to save new document.
+### sheet
+
+`GoogleAppsScript.Spreadsheet.Sheet`
+
+### connect(urlOrId)
+
+Connects to Spreadsheet, if are not passed any parameter the function will try to connect with the current Spreadsheet, in this case, it is assumed that the script is embedded.
+
+#### Parameters
+
+| Name      | Type     | Description            |
+| --------- | -------- | ---------------------- |
+| `urlOrId` | `string` | URL or ID Spreadsheet. |
+
+#### Return
+
+`GssCreator`
+
+### setSheet(sheetName)
+
+Sets a sheet to work with it. If that sheet not exists the function will try to add it.
+
+#### Parameters
+
+| Name        | Type     | Description |
+| ----------- | -------- | ----------- |
+| `sheetName` | `string` | Sheet name  |
+
+#### Return
+
+`GssCreator`
+
+---
+
+### setTable(columns)
+
+Checks that the amount o columns in the sheet and in the columns passed as parameter matches.
+
+---
 
 ## Objects
 
-Objects is a instance of GssObjectsCreator returned by gssClient.create method. Objects is in charge of all methods about data in a sheet, or table. 
+Handle data sheet, see more below.
+
+**sheetNames**: get the names of the others sheets in the same Spreadsheet.
+
+**makeCopy**: Creates a copy of document and return a GssCreator instance.
+
+Params:
+
+- access (GoogleAppsScript.Drive.Access)
+- permission (GoogleAppsScript.Drive.Permission)
+
+**setPermissions**: Sets permissions to file.
+
+Params:
+
+- name (string): name to new document.
+- folderId: (string): folder id to save new document.
+
+## Objects
+
+Objects is a instance of GssObjectsCreator returned by gssClient.create method. Objects is in charge of all methods about data in a sheet, or table.
 
 Objects has the next methods:
 
-__rowGenerator__: retrieve row by row and return it as a GssRow instance. This method can receive a configuration object, that has this attributes:
-  - startAtRow (number): row number where the generator start its cycle.
-  - rowsNumber (number): how many rows will be iterate.
-  - reverse (number): if the iteration will be in reverse.
+**rowGenerator**: retrieve row by row and return it as a GssRow instance. This method can receive a configuration object, that has this attributes:
 
-Example: `rowGenerator({
-    startAtRow: 20,
-    rowsNumber: 15,
-    reverse: true,
-  });`
+- startAtRow (number): row number where the generator start its cycle.
+- rowsNumber (number): how many rows will be iterate.
+- reverse (number): if the iteration will be in reverse.
+
+Example: `rowGenerator({ startAtRow: 20, rowsNumber: 15, reverse: true, });`
 
 If none configuration object is passed the method iterate over all rows in the sheet.
 
-__getRowByNumber__: retrieve a row by his row number, and return it as a GssRow instance.
+**getRowByNumber**: retrieve a row by his row number, and return it as a GssRow instance.
 
-__saveRow__: Saves a row in its sheet, this method must receive a GssRow instance. 
+**saveRow**: Saves a row in its sheet, this method must receive a GssRow instance.
 
 ## GssRow
 
 This class is in charge to retrieve data from row and change its value.
 
-__data__: is an set/get method that returns a array with a values of row, and allows receive a new array of data that must have the same length of column sheet. 
+**data**: is an set/get method that returns a array with a values of row, and allows receive a new array of data that must have the same length of column sheet.
 
-__dataAsObj__: is and attributes that returns a object where the keys are a column names and values a column values.
+**dataAsObj**: is and attributes that returns a object where the keys are a column names and values a column values.
 
-__getVal('columName')__: return a value of a cell by its column name.
+**getVal('columName')**: return a value of a cell by its column name.
 
-__setVal('columName', newValue)__: change value in a row by its columName.
+**setVal('columName', newValue)**: change value in a row by its columName.
 
-To __save__ a row in a sheet use a method __saveRow__ in Objects.
+To **save** a row in a sheet use a method **saveRow** in Objects.

@@ -74,6 +74,8 @@ In our copyAndExport.ts file we write:
             Logger.log(pdfDoc.getDownloadUrl());
         }
 
+# Modules
+
 ## GdocClient
 
 ### create(urlOrId)
@@ -92,27 +94,23 @@ Return a GdocCreator instance.
 
 ## GdocCreator
 
-### Getters
-
-#### app
+### app
 
 This is a getter that returns a GoogleAppsScript.Document.Document instance.
 
-#### id
+### id
 
 Returns a id document (`string`).
 
-#### body
+### body
 
 Returns a Google.document.body.
 
-#### url
+### url
 
 Returns a url document (`string`).
 
-### Methods
-
-#### connect(urlOrId)
+### connect(urlOrId)
 
 Open a document target.
 
@@ -120,55 +118,82 @@ Open a document target.
 | --------- | -------- | ------------------ |
 | `urlOrId` | `string` | URL or ID document |
 
-##### Return
+#### Return
 
 Returns a `GoogleAppsScript.Document.Document` .
 
-#### export(conf)
+### export(conf)
 
 Exports document to MIME type.
 
-##### Parameters
+#### Parameters
+
+| Name   | Type            | Description             |
+| ------ | --------------- | ----------------------- |
+| `conf` | `ConfExportDoc` | Configuration interface |
+
+##### ConfExportDoc
+
+| Name           | Type                              | Description                                 |
+| -------------- | --------------------------------- | ------------------------------------------- |
+| mimeType       | GoogleAppsScript.Drive.MimeType   | Type to export file.                        |
+| name           | string                            | Name for file                               |
+| folderId?      | string                            | Folder ID where file exported will be save. |
+| onlyBlob?      | boolean                           | Returns only Blob                           |
+| accessType     | GoogleAppsScript.Drive.Access     | Access type for user.                       |
+| permissionType | GoogleAppsScript.Drive.Permission | Permission type for user.                   |
 
 ##### Return
 
-#### makeCopy(name, folderId)
+`blob || GoogleAppsScript.Drive.File`
+
+### makeCopy(name, folderId)
 
 Creates a document copy.
 
-##### Parameters
+#### Parameters
 
 | Name       | Type     | Description                               |
 | ---------- | -------- | ----------------------------------------- |
 | `name`     | `string` | Name of the new document. No required.    |
 | `folderId` | `string` | Folder to save new document. No required. |
 
-##### Return
+#### Return
 
 `GoogleAppsScript.Document.Document`.
 
-#### replace(datas, forceWrite)
+### replace(datas, forceWrite)
 
 Replaces a text marks in the text body.
 
-##### Parameters
+#### Parameters
 
 | Name         | Type      | Description                                                                                                                                                  |
 | ------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `data`       | `object`  | Data to be replaced. Keys must be the same as marks in the text, keys will be automatically wrapped between '##' and replaced in the body text by its value. |
 | `forceWrite` | `boolean` | Allows or avoids async document write changes                                                                                                                |
 
-#### setPermissions(access, permission)
+### setPermissions(access, permission)
 
 Handles about access and permission.
 
-##### Parameters
+#### Parameters
 
 | Name         | Type                                | Description                                                                                      |
 | ------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `access`     | `GoogleAppsScript.Drive.Access`     | [See Google Documentation](https://developers.google.com/apps-script/reference/drive/access)     |
 | `permission` | `GoogleAppsScript.Drive.Permission` | [See Google Documentation](https://developers.google.com/apps-script/reference/drive/permission) |
 
-##### Return
+#### Return
 
 `Void`
+
+### setTrashed(trashed)
+
+Send file to trash.
+
+#### Parameters
+
+| Name      | Type      | Description                                            |
+| --------- | --------- | ------------------------------------------------------ |
+| `trashed` | `boolean` | true for send file to trash, false, to bring back file |

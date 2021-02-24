@@ -37,8 +37,10 @@ export default class GssCreator implements CreatorApp {
   // ------------------------------------------------------------
 
   /**
-   * Connects to the app.
-   * @param urlOrId (string)
+   * Connects to Spreadsheet, if are not passed any parameter 
+   * the function will try to connect with the current Spreadsheet,
+   * in this case, it is assumed that the script is embedded.
+   * @param urlOrId (string): URL or ID Spreadsheet.
    * */
   public connect(urlOrId?: string): GssCreator {
     if (urlOrId && urlOrId.includes('google.com')) {
@@ -52,7 +54,10 @@ export default class GssCreator implements CreatorApp {
   }
 
   /**
-   * Set a sheet to work with it.
+   * Sets a sheet to work with it. If that sheet not exists 
+   * the function will try to add it.
+   * @param sheetName (string): Sheet name.
+   * Returns GssCreator.
    * */
   public setSheet(sheetName: string): GssCreator {
     const sheetNames = this.sheetNames();
@@ -95,7 +100,7 @@ export default class GssCreator implements CreatorApp {
         });
     }
     return this;
-  };
+  }
 
   /**
    * Get and array of strings with the names of sheets.
