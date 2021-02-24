@@ -1,29 +1,27 @@
 /**
  * This module manage Http responses.
  * */
-import SETTINGS from '../../Settings';
+import webAppSettings from './defaultSettings';
 import { RequestGetInterface } from './server';
 
 export default class Http {
   /**
-   * Render html using a html template.
+   * Render HTML using a HTML template.
    * */
   public static render(request: {},
     template: string,
-    context: {} = {}) {
+    context: {} = {}): GoogleAppsScript.HTML.HtmlOutput {
     if (!request || typeof request !== 'object') throw new Error(
       'request is a required parameter in render function, it must by placed in the first position.'
     );
-    const favicon = SETTINGS.getProperty('favicon');
-    const title = SETTINGS.getProperty('title');
+    const { favicon, title } = webAppSettings();
     const resp = HtmlService.createTemplateFromFile(template);
     resp.request = request;
     if (context && Object.keys(context).length > 0) {
-      for (const key in context) {
-        if (context.hasOwnProperty(key)) {
-          resp[key] = context[key];
-        }
-      }
+      Object.entries(context).forEach((i: [string, any]) => {
+        const [key, value] = i;
+        resp[key] = value;
+      });
     }
     const evaluated = resp.evaluate();
     if (favicon) evaluated.setFaviconUrl(favicon);
@@ -35,29 +33,26 @@ export default class Http {
   /**
    * Return simple html.
    * */
-  public static htmlResponse(html: string) {
-    const htmlResponse =  HtmlService.createHtmlOutput(html);
-    const favicon = SETTINGS.getProperty('favicon');
-    const title = SETTINGS.getProperty('title');
-    if (favicon) htmlResponse.setFaviconUrl(favicon);
-    if (title) htmlResponse.setTitle(title);
-    return htmlResponse;
+  public static htmlResponse(html: string): GoogleAppsScript.HTML.HtmlOutput {
+    const { favicon, title } = webAppSettings();
+    const htmlresponse = HtmlService.createHtmlOutput(html);
+    if (favicon) htmlresponse.setFaviconUrl(favicon);
+    if (title) htmlresponse.setTitle(title);
+    return htmlresponse;
   }
 
   /**
    * Response in plain text.
    * */
-  public static plainTextResponse(str: string) {
-    const favicon = SETTINGS.getProperty('favicon');
-    const resp = HtmlService.createHtmlOutput(str);
-    if (favicon) resp.setFaviconUrl(favicon);
-    return resp;
+  public static plainTextResponse(str: string): GoogleAppsScript.Content.TextOutput {
+    return ContentService.createTextOutput(str)
+      .setMimeType(ContentService.MimeType.TEXT);
   }
 
   /**
    * Response en JSON.
    * */
-  public static JSONresponse(data: any) {
+  public static JSONresponse(data: any): GoogleAppsScript.Content.TextOutput {
     return ContentService.createTextOutput(JSON.stringify(data))
       .setMimeType(ContentService.MimeType.JSON);
   }

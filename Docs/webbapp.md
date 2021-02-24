@@ -1,4 +1,4 @@
-# Web App Module
+# Web App
 
 This module allows create an easy Web App.
 
@@ -191,7 +191,7 @@ Params:
 
 This module is a class that handle requests and redirect request GET or POST to correct route. By now only handles GET requests.
 
-#### response(req)
+#### static response(req)
 
 This a static method of server that redirect to correct route according to value passed in path GET parameter.
 
@@ -262,7 +262,7 @@ Add a set of routes.
 | -------- | ---------------------------- | --------------------------------------------------------------------------- |
 | `routes` | `[string, RouteInterface[]]` | The first item of array is the name of set, second item is a set of routes. |
 
-#### getInstance()
+#### static getInstance()
 
 This static function checks if a instance exists yet, if not creates a new instance.
 
@@ -323,3 +323,65 @@ Get an absolute route by the path name.
 ##### Return
 
 URL `string`
+
+## HTTP Module
+
+### class Http
+
+#### static render(request, template, context)
+
+Render HTML using a HTML.
+
+##### Parameters
+
+| Name       | Type     | Description                                                                        |
+| ---------- | -------- | ---------------------------------------------------------------------------------- |
+| `request`  | `{}`     | Request taken from doGet or doPost functions.                                      |
+| `template` | `string` | Template path: myDirectory/myfile.html.                                            |
+| `context`  | `{}`     | Pairs key/values to use in template, keys will be transform in template variables. |
+
+##### Return
+
+`GoogleAppsScript.HTML.HtmlOutput`
+
+#### static htmlResponse(html)
+
+Receive a HTML string and return a HTML response.
+
+##### Parameters
+
+| Name   | Type     | Description  |
+| ------ | -------- | ------------ |
+| `html` | `string` | HTML string. |
+
+##### Return
+
+`GoogleAppsScript.HTML.HtmlOutput`
+
+#### static plainTextResponse(str)
+
+Return a plainTextResponse.
+
+##### Parameters
+
+| Name  | Type     | Description     |
+| ----- | -------- | --------------- |
+| `str` | `string` | String to show. |
+
+##### Return
+
+`GoogleAppsScript.Content.TextOutput`
+
+#### static JSONresponse(data)
+
+Return JSON.
+
+##### Parameters
+
+| Name   | Type  | Description            |
+| ------ | ----- | ---------------------- |
+| `data` | `any` | Data to return as JSON |
+
+##### Return
+
+`GoogleAppsScript.Content.TextOutput`
