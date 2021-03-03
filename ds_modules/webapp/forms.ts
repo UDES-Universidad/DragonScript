@@ -1,53 +1,91 @@
 /**
- * Auto generate forms. 
+ * Auto generate forms.
  * */
 
-// Fields
-// ------------------------------------------------------------
+import { BaseFormField } from './fields';
 
-// interface InputConfig {
-//   attrs: {};
-//   label: string;
-//   name: string;
-//   "type": string;
-//   wraper?: {
-//     el: string,
-//     "class": string,
-//   };
-// }
-// 
-// class Input {
-//   private _attrs: {};
-// 
-//   private _label: string;
-// 
-//   private _name: string;
-//   
-//   private _type: string;
-// 
-//   private _wraper: {
-//     el: string,
-//     "class": string,
-//   } | null;
-//   
-//   constructor(config: InputConfig) {
-//     this._attrs = config.attrs;
-//     this._label = config.label;
-//     this._name = config.name;
-//     this._type = config.type;
-//     this._wraper = config.hasOwnProperty('wraper') ? config.wraper : null;
-// 
-//   }
-// 
-//   public draw() {
-//     let input = `<input type="${this._type}" name="${this._name}"`;
-//     for (const attr in this._config.attrs) {
-//       if (object.hasOwnProperty()) {
-//         const element = object[];
-//         
-//       }
-//     }
-//   }
-// 
-//   public label() {}
-// }
+// Interfaces
+// ------------------------------------------------------------
+interface Elements {
+  label: string;
+  field: string;
+}
+
+// Form builder.
+// ------------------------------------------------------------
+class FormBuilder {
+  public fields: BaseFormField[] = [];
+
+  public html: { [key: string]: Elements } = {};
+
+  public fieldsClass: string[] = [];
+
+  public labelsClass: string[] = [];
+
+  public wraperTag: string = 'p';
+
+  public wraperTagClasses: string[] = [];
+
+  public showLabels: boolean = true;
+
+  private _classesConstructor(classes: string[] = []) {
+    let classesStr = ' class="';
+    if (classes.length > 0) {
+      classes.forEach((c) => {
+        classesStr += `${c} `;
+      });
+      classesStr = `${classesStr.trim()}"`;
+      return classesStr;
+    }
+    return '';
+  }
+
+  public setClasses() {
+    const labelsClass = this.labelsClass.length > 0 
+      ? this.labelsClass 
+      : [];
+    const fieldsClass = this.fieldsClass.length > 0 
+      ? this.fieldsClass 
+      : [];
+    for (const field of this.fields) {
+      if (!('classes' in field._label)) {
+        field._label.classes = labelsClass;
+      } else {
+        field._label.classes = [
+          ...<string[]>field._label.classes,
+          ...labelsClass,
+        ];
+      }
+      if (!field._classes.length) {
+        field._classes = fieldsClass;
+      } else if (field._classes.length) {
+        field._classes = [...field._classes, ...fieldsClass];
+      }
+    }
+  }
+
+  public form(values?: { [key: string]: any; }) {
+    const tag = this.wraperTag;
+    const classes = this.wraperTagClasses;
+    const classesStr = this._classesConstructor(classes);
+    let form = '';
+    this.fields.forEach((el) => {
+      const label = this.showLabels === false ? '' : el.label();
+      const field = el.field();
+      this.html[el.name] = { label, field };
+      form += `<${tag}${classesStr || ''}>${label} ${field}</${tag}>`;
+    });
+    return form;
+  }
+}
+
+/**
+ * Form client.
+ * */
+class FormClient {
+  public static create() {
+    return new FormBuilder();
+  }
+}
+
+export default FormClient;

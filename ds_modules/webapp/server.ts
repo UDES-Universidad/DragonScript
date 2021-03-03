@@ -1,7 +1,7 @@
 /**
  * Server module.
  * */
-import webAppSettings from './defaultSettings';
+import webAppSettings_ from './defaultSettings';
 import Router from './router';
 
 // Interfaces
@@ -9,10 +9,21 @@ import Router from './router';
 export interface RequestGetInterface {
   queryString: string;
   contentLength: number;
-  parameters: {};
+  parameters: { [key: string]: string[]; };
+  pathInfo: string;
   contextPath: string;
-  parameter: {};
+  parameter: { [key: string]: string; };
   method: 'GET' | 'POST';
+}
+
+export interface RequestPostInterface {
+  queryString: string;
+  pathInfo: string;
+  parameter: { [key: string]: string; };
+  contentLength: number;
+  contextPath: string;
+  postData: any;
+  parameters: { [key: string]: string[]; };
 }
 
 // Server
@@ -24,17 +35,18 @@ class Server {
   /**
    * Return a view.
    * */
-  public static response(req: RequestGetInterface) {
-    const props = webAppSettings();
-    const path = req.parameter[props.argumentRoute];
+  public static response(req: RequestGetInterface | RequestPostInterface) {
+    const props = webAppSettings_();
+    const pathInfo = 'pathInfo' in req ? req.pathInfo : ''
+    req.pathInfo = pathInfo;
     const debug = Number(props.debug);
     if (debug) {
-      urls();
-      return this._router.getRouteByPath(path).view(req);
+      urls_();
+      return this._router.getRouteByPath(pathInfo).view(req);
     }
     try {
-      urls();
-      return this._router.getRouteByPath(path).view(req);
+      urls_();
+      return this._router.getRouteByPath(pathInfo).view(req);
     } catch (error) {
       return Server.sendError(500, error.message);
     }
@@ -43,17 +55,23 @@ class Server {
   /**
    * If something wrong happens.
    * */
-  public static sendError(code: number, error:string) {
-    return ContentService.createTextOutput(JSON.stringify({
-      status: code,
-      error,
-    })).setMimeType(ContentService.MimeType.JSON);
+  public static sendError(code: number, error: string) {
+
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        status: code,
+        error,
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-const doGet = (req: RequestGetInterface) => {
+function doGet (req: RequestGetInterface) {
   req.method = 'GET';
   return Server.response(req);
-};
+}
 
-const doPost = () => {};
+function doPost (req: RequestPostInterface) {
+  req.method = 'POST';
+  return Server.response(req);
+}

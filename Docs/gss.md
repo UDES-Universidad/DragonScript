@@ -236,31 +236,11 @@ Returns a array with the names of all sheets in the spreadsheet.
 
 ---
 
-## Objects
+# gssObjects Mudule
 
-Handle data sheet, see more below.
+## class GssObjectsCreator
 
-**sheetNames**: get the names of the others sheets in the same Spreadsheet.
-
-**makeCopy**: Creates a copy of document and return a GssCreator instance.
-
-Params:
-
-- access (GoogleAppsScript.Drive.Access)
-- permission (GoogleAppsScript.Drive.Permission)
-
-**setPermissions**: Sets permissions to file.
-
-Params:
-
-- name (string): name to new document.
-- folderId: (string): folder id to save new document.
-
-## Objects
-
-Objects is a instance of GssObjectsCreator returned by gssClient.create method. Objects is in charge of all methods about data in a sheet, or table.
-
-Objects has the next methods:
+This class is in charge of data sheet.
 
 **rowGenerator**: retrieve row by row and return it as a GssRow instance. This method can receive a configuration object, that has this attributes:
 
