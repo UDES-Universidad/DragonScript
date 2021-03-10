@@ -11,15 +11,20 @@ export default class Http {
   public static render(
     request: {},
     template: string,
-    context?: {} = {}
+    context?: { [keys: string]: any } = {}
   ): GoogleAppsScript.HTML.HtmlOutput {
     if (!request || typeof request !== 'object') {
       throw new Error(
         'request is a required parameter in render function, it must by placed in the first position.'
       );
     }
-    let { favicon, title, metaViewPort } = webAppSettings_();
-    if ('title' in context && context.title) title = context.title;
+    let title;
+    const { favicon, appName, metaViewPort } = webAppSettings_();
+    if ('title' in context && context.title) {
+      title = context.title;
+    } else {
+      title = appName;
+    }
     const resp = HtmlService.createTemplateFromFile(template);
     resp.request = request;
     if (context && Object.keys(context).length > 0) {
@@ -32,7 +37,9 @@ export default class Http {
     if (metaViewPort) evaluated.addMetaTag('viewport', metaViewPort);
     if (favicon) evaluated.setFaviconUrl(favicon);
     if (title) evaluated.setTitle(title);
-    if (context && context.hasOwnProperty('setTitle')) evaluated.setTitle(context.setTile);
+    if (context && context.hasOwnProperty('setTitle')) {
+      evaluated.setTitle(context.setTile);
+    }
     return evaluated;
   }
 
@@ -40,10 +47,10 @@ export default class Http {
    * Return simple html.
    * */
   public static htmlResponse(html: string): GoogleAppsScript.HTML.HtmlOutput {
-    const { favicon, title } = webAppSettings_();
+    const { favicon, appName } = webAppSettings_();
     const htmlresponse = HtmlService.createHtmlOutput(html);
     if (favicon) htmlresponse.setFaviconUrl(favicon);
-    if (title) htmlresponse.setTitle(title);
+    if (appName) htmlresponse.setTitle(appName);
     return htmlresponse;
   }
 
@@ -66,10 +73,33 @@ export default class Http {
       ContentService.MimeType.JSON
     );
   }
+
+  /**
+   * Redirect request to some direction.
+   * @param request ({ [keys: string]: any; })
+   * @param url (string)
+   * @param template (string)
+   * @param context ({ [keys: string]: any; })
+   * */
+  public static redirect(
+    request: { [keys: string]: any },
+    url: string,
+    template?: string,
+    context?: { [keys: string]: any }
+  ) {
+    const redirect = Http.render(
+      request,
+      template || webAppSettings_().redirectTemplate,
+      { url, ...context }
+    );
+    redirect.append(`
+      <script>
+        window.open('${url}', '_top');
+      </script>
+    `);
+    return redirect;
+  }
 }
-
-
-
 
 // class ViewFactory extends View {
 //   public template: string;

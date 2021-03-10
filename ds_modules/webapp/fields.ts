@@ -12,7 +12,7 @@
 interface FieldConfig {
   attrs?: { [key: string]: string };
   classes?: string[];
-  label?: { name: string; classes?: string[]; } | string;
+  label?: { name: string; classes?: string[] } | string;
   name: string;
   helpText?: string;
   required?: boolean;
@@ -52,6 +52,14 @@ export class BaseFormField {
 
   protected _validators: { [keys: string]: (value: any) => [boolean, string] } = {};
 
+  protected _regExpDefault: [string, string] | RegExp = '';
+
+  protected _FieldRegExpValidatorConf: RegExpFieldValidatorConf = {
+    regExp: '',
+    msgError: '',
+    msgSucess: '',
+  };
+
   constructor(config: FieldConfig) {
     if ('attrs' in config) {
       this._attrs = typeof config.attrs === 'string' ? { name: config.attrs, classes: [] } : config.attrs;
@@ -64,6 +72,27 @@ export class BaseFormField {
     if ('validators' in config) this._validators = config.validators;
     this._name = config.name;
     this._id = this._name;
+  }
+  
+  /**
+   * Validate a Regular Expression.
+   * */
+  protected _regExpValidator(value: string, _regexp?: RegExp, errMsg?: string) {
+    const data = String(value);
+    let regExp: RegExp;
+    if (_regexp) {
+      regExp = _regexp;
+    } else if (Array.isArray(this._regExpDefault)) {
+      regExp = this._FieldRegExpValidatorConf.regExp || new RegExp(...this._regExpDefault);
+    } else {
+      regExp = this._FieldRegExpValidatorConf.regExp || this._regExpDefault;
+    }
+    if (!regExp.test(data)) {
+      this._isvalid = false;
+      this._errors.push(errMsg || this._FieldRegExpValidatorConf.msgError || 'Error');
+    } else if (this._FieldRegExpValidatorConf.msgSucess) {
+      this._success.push(this._FieldRegExpValidatorConf.msgSucess);
+    }
   }
 
   /**
@@ -208,17 +237,21 @@ class TextInput extends BaseFormField {
     const data = String(value);
     if (this._maxlength && data.length > this._maxlength.length) {
       this._isvalid = false;
-      this._errors.push(this._maxlength.msgError
-        ? this._maxlength.msgError
-        : `${this._maxlength.length} are the max length of characters allowed.`);
+      this._errors.push(
+        this._maxlength.msgError
+          ? this._maxlength.msgError
+          : `${this._maxlength.length} are the max length of characters allowed.`
+      );
     } else if (this._maxlength?.msgSucess) {
       this._success.push(this._maxlength.msgSucess);
     }
     if (this._minlength && data.length < this._minlength.length) {
       this._isvalid = false;
-      this._errors.push(this._minlength.msgError
-        ? this._minlength.msgError
-        : `${this._minlength.length} are the max length of characters allowed.`);
+      this._errors.push(
+        this._minlength.msgError
+          ? this._minlength.msgError
+          : `${this._minlength.length} are the max length of characters allowed.`
+      );
     } else if (this._minlength?.msgSucess) {
       this._success.push(this._minlength.msgSucess);
     }
@@ -247,46 +280,29 @@ interface EmailInputFieldInter extends TextInputFieldInter {
  * */
 class EmailInput extends TextInput {
   protected _fieldType = 'email';
-  
+
   protected _regExpDefault: [string, string] | RegExp = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
   protected _FieldRegExpValidatorConf: RegExpFieldValidatorConf = {
     regExp: '',
     msgError: 'Please enter a valid email address.',
     msgSucess: '',
-  }
+  };
 
   constructor(config: EmailInputFieldInter) {
     super(config);
-    if ('regExpValidator' in config) this._FieldRegExpValidatorConf = {
-      ...this._FieldRegExpValidatorConf,
-      ...config.regExpValidator,
-    };
-  }
-  
-  protected _regExpValidator(): RegExp {
-    let regExp: RegExp;
-    if (Array.isArray(this._regExpDefault)) {
-      regExp = this._FieldRegExpValidatorConf.regExp
-        || new RegExp(...this._regExpDefault); 
-    } else {
-      regExp = this._FieldRegExpValidatorConf.regExp
-        || this._regExpDefault;
+    if ('regExpValidator' in config) {
+      this._FieldRegExpValidatorConf = {
+        ...this._FieldRegExpValidatorConf,
+        ...config.regExpValidator,
+      };
     }
-    return regExp;
-  } 
+  }
 
   public validate(value: string) {
     const data = String(value).toLowerCase();
-    const regExp: RegExp = this._regExpValidator(); 
-    Logger.log(regExp.test(data));
-    if (!regExp.test(data)) {
-      this._isvalid = false;
-      this._errors.push(this._FieldRegExpValidatorConf.msgError);
-    } else if (this._FieldRegExpValidatorConf.msgSucess) {
-      this._success.push(this._FieldRegExpValidatorConf.msgSucess);
-    }
-    this._execValidators(data)
+    this._regExpValidator(value);
+    this._execValidators(data);
     return data;
   }
 }
@@ -297,24 +313,26 @@ class EmailInput extends TextInput {
 
 class PhoneInput extends EmailInput {
   protected _fieldType = 'tel';
-  
-  protected _regExpDefault: [string, string] = ['^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$', 'im'];
+
+  protected _regExpDefault: [string, string] = ['^[+]?[(]?[0-9]{3}[)]?[-s.]?[0-9]{3}[-s.]?[0-9]{4,6}$', 'im'];
 
   protected _FieldRegExpValidatorConf: RegExpFieldValidatorConf = {
     regExp: '',
     msgError: 'Please enter a valid phone',
     msgSucess: '',
-  }
+  };
 
   constructor(config: EmailInputFieldInter) {
     super(config);
-    this._attrs.pattern = Array.isArray(this._regExpDefault) 
-      ? this._regExpDefault[0] 
+    this._attrs.pattern = Array.isArray(this._regExpDefault)
+      ? this._regExpDefault[0]
       : this._regExpDefault;
-    if ('regExpValidator' in config) this._FieldRegExpValidatorConf = {
-      ...this._FieldRegExpValidatorConf,
-      ...config.regExpValidator,
-    };
+    if ('regExpValidator' in config) {
+      this._FieldRegExpValidatorConf = {
+        ...this._FieldRegExpValidatorConf,
+        ...config.regExpValidator,
+      };
+    }
   }
 }
 

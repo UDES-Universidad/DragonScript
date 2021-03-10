@@ -1,25 +1,36 @@
+interface webAppSettingsInter {
+  debug: number;
+  urlProd: string;
+  urlDev: string;
+  favicon: string;
+  metaViewPort: string;
+  appName: string;
+  error404Template: string;
+  redirectTemplate: string;
+  componentPaths: string[];
+}
+
 function webAppSettings_() {
-  const scriptProperties = PropertiesService.getScriptProperties();
-  const props = scriptProperties.getProperties();
-  const defaultVals = {
+  const data: webAppSettingsInter = {
     debug: 0,
-    argumentRoute: '',
     urlProd: '',
     urlDev: '',
     favicon: '',
-    title: '',
+    appName: '',
     error404Template: '',
     metaViewPort: 'width=device-width, initial-scale=1.0',
+    redirectTemplate: '',
+    componentPaths: ['src', 'src/components'],
   };
-  for (const key of Object.keys(defaultVals)) {
-    if (key in props) {
-      props[key] = props[key] ? props[key] : defaultVals[key];
-    } else {
-      props[key] = defaultVals[key];
-    }
-  }
+  try {
+    const keys: { [keys: string]: any } = Object.keys(settings_());
+    const customSettings: { [keys: string]: any } = settings_();
+    keys.forEach((key: string) => {
+      if (key in customSettings) data[key] = customSettings[key];
+    });
+  } catch (e) {}
 
-  return props;
+  return data;
 }
 
 export default webAppSettings_;
