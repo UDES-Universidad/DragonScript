@@ -14,7 +14,7 @@ When the manager ask you for the modules that it will use write: webapp.
 
 Execute `node ./ds-manager.js app -pull`.
 
-In the DragonExample directory inner your project directory create two files: **https.ts** and **urls.ts**.
+In the DragonExample directory inner your project directory create two files: **http.ts** and **urls.ts**.
 
 ### Project structure
 
@@ -30,21 +30,19 @@ In the DragonExample directory inner your project directory create two files: **
       │        └── utils.ts
       └── DragonExample
           ├── urls.ts
-          └── https.ts
+          └── views.ts
 
 ### Settings.ts
 
-    const Settings = () => {
-      const scriptProperties = PropertiesService.getScriptProperties();
-      scriptProperties.setProperties({
-        'debug': '0',
-        'argumentRoute': 'path',
-        'urlProd': 'https://google.com/myScriptURL-production',
-        'urlDev': 'https://google.com/myScriptURL-dev',
-      });
+    function settings_ = () => {
+      return {
+        debug: 0,
+        urlProd: 'https://google.com/myScriptURL-production',
+        urlDev: 'https://google.com/myScriptURL-dev',
+      };
     }
 
-### https.ts
+### views.ts
 
     // This module imports Https module.
     import Http from '../ds_modules/webapp/http';
@@ -65,7 +63,7 @@ A urls functions is needed declared in any place of project, but is a good pract
     import Router from '../ds_modules/webapp/router';
     import helloWorld from './views';
 
-    const urls = () => {
+    const urls_ = () => {
       const paths = Router();
 
       /**
@@ -105,13 +103,9 @@ Http class contains next static methods:
 **render(request: {}, template: string, context: {})**: recibe a request object, template is the path to template in
 Google Apps Script syntax, and context, values that will rendered in the template. Return a html.
 
-## Urls
+## urls\_
 
-Urls are called by this way only for confort, because in GAS (Google Apps Script) is not possible use a customs URLs, but we can emulate this by the use of GET arguments. By default DS (DragonScript) use argument **path** to recibe the route to some resource. By example:
-
-`this-is-a-GAS-url/exec?path=some/route`
-
-To create a new route we need to use a **Router** class. All routes that you create must be inner a function called **urls**, that can be declared in any place, but we recommend create a file only for this purpose. You can import a router by this way: `import Router from '../ds_modules/webapp/router';`
+To create a new route we need to use a **Router** class. All routes that you create must be inner a function called **urls\_**, that can be declared in any place, but we recommend create a file only for this purpose. You can import a router by this way: `import Router from '../ds_modules/webapp/router';`
 
 ## Router
 
@@ -177,11 +171,28 @@ Also you can do it this in a template:
 
 This module includes this functions:
 
-**includes(filename: string)**: This function allows import html code in other html file at the momento of evaluate.
+### includes_(filename: string)
 
-Params:
+This function allows import html code in other html file at the momento of evaluate.
 
-- filename (string): filename.
+#### Parameters
+
+| Name     | Type   | Description                                  |
+| -------- | ------ | -------------------------------------------- |
+| filename | string | Name of file to be included in another file. |
+
+### loadComponent_(name: string, context?: { [keys: string]: any })
+
+This function load a component. Component is a piece of code to be added in some HTML file.
+
+#### Parameters
+
+| Name    | Type                     | Description                         |
+| ------- | ------------------------ | ----------------------------------- |
+| name    | string                   | Component file name                 |
+| context | { [keys: string]: any; } | Context to be evaluated in the file |
+
+Example: `<?!= loadComponent_('MyComponent', { title: 'Sometile', myVar: 'This is some var' }) ?>`
 
 # Modules
 
