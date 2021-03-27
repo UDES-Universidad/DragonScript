@@ -22,13 +22,13 @@ class AbstractArgument {
   argsv = null;
 
   /**
-    * Get parse arguments from command line.
-    * */
+   * Get parse arguments from command line.
+   * */
   argParser() {}
 
   /**
    * Execute all work with the arguments.
-    * */
+   * */
   processor() {}
 
   constructor(parser) {
@@ -38,38 +38,38 @@ class AbstractArgument {
   }
 
   /**
-    * Get a base directory where the core script is hosted.
-    * */
+   * Get a base directory where the core script is hosted.
+   * */
   _baseDir() {
     return path.dirname(path.dirname(__dirname));
   }
 
   /**
    * Get directory where the script is executing.
-    * */
+   * */
   _currentExecDir() {
     return process.cwd();
   }
 
   /**
-    * Return a command info.
-    * */
+   * Return a command info.
+   * */
   toString() {
     return `- ${this.name}: ${this.help}`;
   }
 
   /**
-    * Executes de process.
-    * */
+   * Executes de process.
+   * */
   exec() {
     this.argParser();
     this.processor();
   }
 
   /**
-    * Get data from terminal.
-    * This is a promise.
-    * */
+   * Get data from terminal.
+   * This is a promise.
+   * */
   prompt(query) {
     return new Promise((resolve) => {
       const wonder = readline.createInterface({
@@ -85,8 +85,8 @@ class AbstractArgument {
   }
 
   /**
-    * Get value from args or prompt.
-    * */
+   * Get value from args or prompt.
+   * */
   valArsOrPrompt(argName, message) {
     const arg = this.argsv[argName]
       ? this.argsv[argName]
