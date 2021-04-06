@@ -19,7 +19,7 @@ function webAppSettings_() {
     appName: '',
     error404Template: '',
     metaViewPort: 'width=device-width, initial-scale=1.0',
-    redirectTemplate: '',
+    redirectTemplate: 'ds_modules/webapp/templates/redirect.html',
     componentPaths: ['src', 'src/components'],
   };
   try {
