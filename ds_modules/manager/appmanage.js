@@ -2,7 +2,7 @@ const { exec } = require('child_process');
 const fs = require('fs-extra');
 const path = require('path');
 
-const AbstractArgument = reqire('./prototype');
+const AbstractArgument = require('./prototype');
 
 /**
  * Mange arguments for app command.

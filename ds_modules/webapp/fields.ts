@@ -9,6 +9,12 @@
 // ---------- Base field. -------------------------------------
 // ------------------------------------------------------------
 
+interface ValidatorItem {
+  fn: (value: any) => boolean;
+  msgSucess?: string;
+  msgError?: string;
+}
+
 interface FieldConfig {
   attrs?: { [key: string]: string };
   classes?: string[];
@@ -17,9 +23,7 @@ interface FieldConfig {
   helpText?: string;
   required?: boolean;
   disable?: boolean;
-  validators?: {
-    [key: string]: (value: any) => [boolean, string];
-  };
+  validators?: ValidatorItem[];
 }
 
 /**
@@ -50,7 +54,7 @@ export class BaseFormField {
 
   public _value: any = '';
 
-  protected _validators: { [keys: string]: (value: any) => [boolean, string] } = {};
+  protected _validators: ValidatorItem[] = [];
 
   protected _regExpDefault: [string, string] | RegExp = '';
 
@@ -62,7 +66,10 @@ export class BaseFormField {
 
   constructor(config: FieldConfig) {
     if ('attrs' in config) {
-      this._attrs = typeof config.attrs === 'string' ? { name: config.attrs, classes: [] } : config.attrs;
+      this._attrs =
+        typeof config.attrs === 'string'
+          ? { name: config.attrs, classes: [] }
+          : config.attrs;
     }
     if ('label' in config) this._label = config.label;
     if ('classes' in config) this._classes = config.classes;
@@ -73,7 +80,7 @@ export class BaseFormField {
     this._name = config.name;
     this._id = this._name;
   }
-  
+
   /**
    * Validate a Regular Expression.
    * */
@@ -83,13 +90,17 @@ export class BaseFormField {
     if (_regexp) {
       regExp = _regexp;
     } else if (Array.isArray(this._regExpDefault)) {
-      regExp = this._FieldRegExpValidatorConf.regExp || new RegExp(...this._regExpDefault);
+      regExp =
+        this._FieldRegExpValidatorConf.regExp ||
+        new RegExp(...this._regExpDefault);
     } else {
       regExp = this._FieldRegExpValidatorConf.regExp || this._regExpDefault;
     }
     if (!regExp.test(data)) {
       this._isvalid = false;
-      this._errors.push(errMsg || this._FieldRegExpValidatorConf.msgError || 'Error');
+      this._errors.push(
+        errMsg || this._FieldRegExpValidatorConf.msgError || 'Error'
+      );
     } else if (this._FieldRegExpValidatorConf.msgSucess) {
       this._success.push(this._FieldRegExpValidatorConf.msgSucess);
     }
@@ -116,19 +127,21 @@ export class BaseFormField {
    * @param data (any): data to be validated.
    * */
   protected _execValidators(data: any) {
-    Object.keys(this._validators).forEach((key) => {
-      const [result, msg] = this._validators[key](data);
-      if (result) {
-        if (msg) this._success.push(msg);
-      } else {
-        this._isvalid = false;
-        if (msg) {
-          this._errors.push(msg);
+    if (this._validators.length > 0) {
+      this._validators.forEach((item: ValidatorItem) => {
+        const isValid = item.fn(data);
+        if (isValid) {
+          const msg =
+            'msgSucess' in item && item.msgSucess ? item.msgSucess : 'Success';
+          this._success.push(msg);
         } else {
-          this._errors.push('Error');
+          this._isvalid = false;
+          const msg =
+            'msgError' in item && item.msgError ? item.msgError : 'Error';
+          this._errors.push(msg);
         }
-      }
-    });
+      });
+    }
   }
 
   /**
@@ -145,7 +158,8 @@ export class BaseFormField {
       this._label.name = this._name;
       labelName = this._name;
     }
-    const classes = 'classes' in this._label ? Object.keys(this._label.classes) : [];
+    const classes =
+      'classes' in this._label ? Object.keys(this._label.classes) : [];
     if (classes.length > 0) {
       labelStr += ` ${this._classesConstructor(this._label.classes)}`;
     }
@@ -201,7 +215,9 @@ class TextInput extends BaseFormField {
 
   private _maxlength?: TextFieldValidatorConf;
 
-  protected _validators: { [keys: string]: (value: string) => [boolean, string] } = {};
+  protected _validators: {
+    [keys: string]: (value: string) => [boolean, string];
+  } = {};
 
   constructor(config: TextInputFieldInter) {
     super(config);
@@ -235,6 +251,10 @@ class TextInput extends BaseFormField {
    */
   public validate(value: any) {
     const data = String(value);
+    if (this._required && !data) {
+      this._isvalid = false;
+      this._errors.push('Required field.');
+    }
     if (this._maxlength && data.length > this._maxlength.length) {
       this._isvalid = false;
       this._errors.push(
@@ -281,7 +301,9 @@ interface EmailInputFieldInter extends TextInputFieldInter {
 class EmailInput extends TextInput {
   protected _fieldType = 'email';
 
-  protected _regExpDefault: [string, string] | RegExp = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+  protected _regExpDefault:
+    | [string, string]
+    | RegExp = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
   protected _FieldRegExpValidatorConf: RegExpFieldValidatorConf = {
     regExp: '',
@@ -301,6 +323,10 @@ class EmailInput extends TextInput {
 
   public validate(value: string) {
     const data = String(value).toLowerCase();
+    if (this._required && !data) {
+      this._isvalid = false;
+      this._errors.push('Required field.');
+    }
     this._regExpValidator(value);
     this._execValidators(data);
     return data;
@@ -314,7 +340,10 @@ class EmailInput extends TextInput {
 class PhoneInput extends EmailInput {
   protected _fieldType = 'tel';
 
-  protected _regExpDefault: [string, string] = ['^[+]?[(]?[0-9]{3}[)]?[-s.]?[0-9]{3}[-s.]?[0-9]{4,6}$', 'im'];
+  protected _regExpDefault: [string, string] = [
+    '^[+]?[(]?[0-9]{3}[)]?[-s.]?[0-9]{3}[-s.]?[0-9]{4,6}$',
+    'im',
+  ];
 
   protected _FieldRegExpValidatorConf: RegExpFieldValidatorConf = {
     regExp: '',

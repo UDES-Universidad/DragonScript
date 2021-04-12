@@ -34,7 +34,7 @@ class FormBuilder {
 
   public showLabels: boolean = true;
 
-  public values: { [key: string]: any; } = {};
+  public values: { [key: string]: any } = {};
 
   public fieldsConf: FieldsConfInter = {
     fieldsClass: [],
@@ -55,27 +55,33 @@ class FormBuilder {
     tagClasses: [],
     wraperTag: 'ul',
     wraperTagClasses: [],
-  }
+  };
 
   public successConf: HelpTextConfInter = {
     tag: 'li',
     tagClasses: [],
     wraperTag: 'ul',
     wraperTagClasses: [],
-  }
+  };
 
   private _classesConstructor(classes: string[] = []) {
     if (classes.length > 0) {
-      return `class="${classes.join(' ').trim()}"`
+      return `class="${classes.join(' ').trim()}"`;
     }
     return '';
   }
 
   private _helpTextBuilder(config: HelpTextConfInter, content: string[]) {
     let html = '';
-    if (config.wraperTag) html += `<${config.wraperTag} ${this._classesConstructor(config.wraperTagClasses)}>`;
+    if (config.wraperTag) {
+      html += `<${config.wraperTag} ${this._classesConstructor(
+        config.wraperTagClasses
+      )}>`;
+    }
     content.forEach((c: string) => {
-      html += `<${config.tag} ${this._classesConstructor(config.tagClasses)}>${c}</${config.tag}>`
+      html += `<${config.tag} ${this._classesConstructor(
+        config.tagClasses
+      )}>${c}</${config.tag}>`;
     });
     if (config.wraperTag) html += `</${config.wraperTag}>`;
     return html;
@@ -87,8 +93,7 @@ class FormBuilder {
   public setClasses() {
     for (const field of this.fields) {
       // Label
-      if (typeof field._label !== 'string' 
-        && !('classes' in field._label)) {
+      if (typeof field._label !== 'string' && !('classes' in field._label)) {
         field._label.classes = this.fieldsConf.labelsClass;
       } else if (typeof field._label === 'string') {
         field._label = {
@@ -101,19 +106,16 @@ class FormBuilder {
           ...this.fieldsConf.labelsClass,
         ];
       }
-      
+
       // Field
       if (!field._classes.length) {
         field._classes = this.fieldsConf.fieldsClass;
       } else if (field._classes.length) {
-        field._classes = [
-          ...field._classes,
-          ...this.fieldsConf.fieldsClass,
-        ];
+        field._classes = [...field._classes, ...this.fieldsConf.fieldsClass];
       }
     }
   }
-  
+
   /**
    * Creates HTML form.
    * */
@@ -132,34 +134,24 @@ class FormBuilder {
         value = field._value;
       }
       // Label
-      const labelHtml = this.showLabels === false 
-        ? '' 
-        : field.label();
+      const labelHtml = this.showLabels === false ? '' : field.label();
       const fieldHtml = field.field(value);
       this.html[field._name] = { label: labelHtml, field: fieldHtml };
       // Input
       form += `<${tag} ${classesStr || ''}>${labelHtml} ${fieldHtml}`;
       // Help text
-      const areTherehelpTexts = field._helpText || field._errors || field._success;
+      const areTherehelpTexts =
+        field._helpText || field._errors || field._success;
       if (areTherehelpTexts) {
         if (field._helpText) {
-          form += this._helpTextBuilder(
-            this.helpTextConf, 
-            [field._helpText],
-          );
+          form += this._helpTextBuilder(this.helpTextConf, [field._helpText]);
         }
         if (field._errors.length > 0) {
           Logger.log(field._errors);
-          form += this._helpTextBuilder(
-            this.errorConf,
-            field._errors,
-          );
+          form += this._helpTextBuilder(this.errorConf, field._errors);
         }
         if (field._success.length > 0) {
-          form += this._helpTextBuilder(
-            this.successConf,
-            field._success,
-          );
+          form += this._helpTextBuilder(this.successConf, field._success);
         }
       }
 
@@ -167,25 +159,20 @@ class FormBuilder {
     }
     return form;
   }
-  
+
   /**
    * Validates form
    * */
   public validate(formData: { [key: string]: string }) {
-    const validateFields: boolean[] = []
+    const validateFields: boolean[] = [];
     const data: { [key: string]: string } = {};
     this.fields.forEach((field) => {
       const name = field._name;
-      const value = formData && name in formData 
-        ? formData[name] 
-        : '';
+      const value = formData && name in formData ? formData[name] : '';
       data[name] = field.validate(value);
       validateFields.push(field._isvalid);
     });
-    return [
-      validateFields.every((v) => v === true),
-      formData
-    ];
+    return [validateFields.every((v) => v === true), formData];
   }
 }
 
