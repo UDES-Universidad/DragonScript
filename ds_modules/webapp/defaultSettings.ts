@@ -23,12 +23,14 @@ function webAppSettings_() {
     componentPaths: ['src', 'src/components'],
   };
   try {
-    const keys: { [keys: string]: any } = Object.keys(settings_());
     const customSettings: { [keys: string]: any } = settings_();
+    const keys: { [keys: string]: any } = Object.keys(data);
     keys.forEach((key: string) => {
       if (key in customSettings) data[key] = customSettings[key];
     });
-  } catch (e) {}
+  } catch (e) {
+    Logger.log(e);
+  }
 
   return data;
 }

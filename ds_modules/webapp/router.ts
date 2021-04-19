@@ -31,12 +31,16 @@ class RouterSingleton {
   /**
    * Get routes by single or group mode.
    * */
-  private _getRoutesByMode(mode: 'single' | 'group'): RouteInterface[] | [string, RouteInterface[]][] {
+  private _getRoutesByMode(
+    mode: 'single' | 'group'
+  ): RouteInterface[] | [string, RouteInterface[]][] {
     if (mode === 'single') {
       return <RouteInterface[]>this._routes.filter((i) => !Array.isArray(i));
     }
     if (mode === 'group') {
-      return <[string, RouteInterface[]][]>this._routes.filter((i) => Array.isArray(i));
+      return <[string, RouteInterface[]][]>(
+        this._routes.filter((i) => Array.isArray(i))
+      );
     }
     throw new Error('There is no routes!');
   }
@@ -61,17 +65,27 @@ class RouterSingleton {
   public getScriptUrl() {
     const props = webAppSettings_();
     const debug = Number(props.debug);
-    if (debug === 1) return props.urlDev;
-    return props.urlProd;
+    if (debug === 1) {
+      return props.urlDev;
+    }
+    if (props.urlProd) {
+      return props.urlProd
+    }
+    return ScriptApp.getService().getUrl();
   }
 
   /**
    * Add simple route.
    * */
   public addRoute(route: RouteInterface) {
-    if (typeof route !== 'object' && Array.isArray(route)) throw new Error('Route must be an object.');
+    if (typeof route !== 'object' && Array.isArray(route))
+      throw new Error('Route must be an object.');
     if (!route.name) throw new Error('Route must has a name.');
-    if (typeof route.path !== 'string' || route.path === undefined || route.path === null) {
+    if (
+      typeof route.path !== 'string' ||
+      route.path === undefined ||
+      route.path === null
+    ) {
       throw new Error('Route must has a path.');
     }
     if (!route.view) throw new Error('Route must has a view;');
@@ -85,7 +99,8 @@ class RouterSingleton {
     if (Array.isArray(routes)) {
       if (typeof routes[0] === 'string') {
         routes[1].forEach((i) => {
-          if (!i.name && !i.path && i.view) throw new Error('Routes are incompletes');
+          if (!i.name && !i.path && i.view)
+            throw new Error('Routes are incompletes');
         });
         this._routes.push(routes);
       }
@@ -96,10 +111,17 @@ class RouterSingleton {
    * If no route found.
    * */
   public routeNotFound(request: {}, template: string, context?: {}) {
-    let { favicon, title, metaViewPort, error404Template } = webAppSettings_();
+    const {
+      favicon,
+      title,
+      metaViewPort,
+      error404Template,
+    } = webAppSettings_();
     let output;
     if (template || error404Template) {
-      const resp = HtmlService.createTemplateFromFile(template || error404Template);
+      const resp = HtmlService.createTemplateFromFile(
+        template || error404Template
+      );
       const keys = context ? Object.keys(context) : [];
       if (keys.length > 0) {
         keys.forEach((key) => {
@@ -108,12 +130,13 @@ class RouterSingleton {
       }
       output = resp.evaluate();
     } else {
-      output = HtmlService.createHtmlOutput(`<h1>404 not found</h1>`);
+      output = HtmlService.createHtmlOutput('<h1>404 not found</h1>');
     }
     if (metaViewPort) output.addMetaTag('viewport', metaViewPort);
     if (favicon) output.setFaviconUrl(favicon);
     if (title) output.setTitle(title);
-    if (context && context.hasOwnProperty('setTitle')) output.setTitle(context.setTile);
+    if (context && context.hasOwnProperty('setTitle'))
+      output.setTitle(context.setTile);
     return output;
   }
 
@@ -125,16 +148,22 @@ class RouterSingleton {
   public getRouteByName(name: string): RouteInterface {
     if (name.includes(':')) {
       const [groupName, routeName] = name.trim().split(':');
-      const groupRoutes = this._getRoutesByMode('group').filter((i: [string, RouteInterface[]]) => i[0] === groupName);
+      const groupRoutes = this._getRoutesByMode('group').filter(
+        (i: [string, RouteInterface[]]) => i[0] === groupName
+      );
       if (groupRoutes.length > 0) {
-        const routes = groupRoutes[0][1].filter((i: RouteInterface) => i.name === routeName);
+        const routes = groupRoutes[0][1].filter(
+          (i: RouteInterface) => i.name === routeName
+        );
         if (routes.length > 0) {
           routes[0].__path__ = this._joinPaths([groupName, routes[0].path]);
           return routes[0];
         }
       }
     } else {
-      const routes = this._getRoutesByMode('single').filter((i: RouteInterface) => i.name === name);
+      const routes = this._getRoutesByMode('single').filter(
+        (i: RouteInterface) => i.name === name
+      );
       if (routes.length > 0) {
         routes[0].__path__ = routes[0].path;
         return routes[0];
@@ -163,7 +192,10 @@ class RouterSingleton {
       }
     }
     let error404;
-    if (!Array.isArray(this._routes[0]) && this._routes[0].name === 'error404') {
+    if (
+      !Array.isArray(this._routes[0]) &&
+      this._routes[0].name === 'error404'
+    ) {
       error404 = this._routes[0];
     } else {
       error404 = {
@@ -187,6 +219,10 @@ class RouterSingleton {
   }
 }
 
-const Router = (): RouterSingleton => RouterSingleton.getInstance();
+class Router {
+  public static create(): RouterSingleton {
+    return RouterSingleton.getInstance();
+  }
+}
 
 export default Router;

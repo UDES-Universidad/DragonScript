@@ -57,5 +57,5 @@ function loadComponent_(name: string, context?: { [keys: string]: any }) {
  * Get Url by Name.
  * */
 function getUrlByName_(name: string) {
-  return Router().getUrlByName(name);
+  return Router.create().getUrlByName(name);
 }

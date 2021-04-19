@@ -9,35 +9,35 @@ import Router from './router';
 export interface RequestGetInterface {
   queryString: string;
   contentLength: number;
-  parameters: { [key: string]: string[]; };
+  parameters: { [key: string]: string[] };
   pathInfo: string;
   contextPath: string;
-  parameter: { [key: string]: string; };
+  parameter: { [key: string]: string };
   method: 'GET' | 'POST';
 }
 
 export interface RequestPostInterface {
   queryString: string;
   pathInfo: string;
-  parameter: { [key: string]: string; };
+  parameter: { [key: string]: string };
   contentLength: number;
   contextPath: string;
   postData: any;
-  parameters: { [key: string]: string[]; };
+  parameters: { [key: string]: string[] };
 }
 
 // Server
 // ------------------------------------------------------------
 
 class Server {
-  private static _router = Router();
+  private static _router = Router.create();
 
   /**
    * Return a view.
    * */
   public static response(req: RequestGetInterface | RequestPostInterface) {
     const props = webAppSettings_();
-    const pathInfo = 'pathInfo' in req ? req.pathInfo : ''
+    const pathInfo = 'pathInfo' in req ? req.pathInfo : '';
     req.pathInfo = pathInfo;
     const debug = Number(props.debug);
     if (debug) {
@@ -56,7 +56,6 @@ class Server {
    * If something wrong happens.
    * */
   public static sendError(code: number, error: string) {
-
     return ContentService.createTextOutput(
       JSON.stringify({
         status: code,
@@ -66,12 +65,12 @@ class Server {
   }
 }
 
-function doGet (req: RequestGetInterface) {
+function doGet(req: RequestGetInterface) {
   req.method = 'GET';
   return Server.response(req);
 }
 
-function doPost (req: RequestPostInterface) {
+function doPost(req: RequestPostInterface) {
   req.method = 'POST';
   return Server.response(req);
 }

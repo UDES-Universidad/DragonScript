@@ -113,6 +113,10 @@ class RealTime {
     if (!('autoId' in conf && conf.autoId === true) && conf.method !== 'GET') {
       options.headers['X-HTTP-Method-Override'] = 'PATCH';
     }
+    if (conf.method === 'DELETE') {
+      options.method = 'POST';
+      options.headers['X-HTTP-Method-Override'] = 'DELETE';
+    }
     if ('payload' in conf && Object.keys(conf.payload).length > 0) {
       options.payload = JSON.stringify(conf.payload);
     }
@@ -158,6 +162,9 @@ class RealTime {
     return encodeURI(url);
   }
 
+  /**
+   * Get data from db.
+   * */
   public getData(conf: { path: string; filters?: FiltersConf }) {
     const data: { path: string; filters?: FiltersConf } = {
       path: conf.path,
@@ -173,24 +180,44 @@ class RealTime {
     return request;
   }
 
+  /**
+   * Sets data in db.
+   * */
   public setData(conf: {
     path: string;
-    payload: { [keys: string]: string };
+    payload: { [keys: string]: any };
     autoId: boolean;
     method: 'POST' | 'PUT' | 'PATCH';
   }) {
-    const obj = { ...conf };
-    delete obj.path;
-    if (!('method' in conf)) {
-      obj.method = 'POST';
+    let method: 'POST' | 'PUT' | 'PATCH' = 'POST';
+    let autoId: boolean = true;
+    const { payload } = conf;
+    if ('method' in conf && conf.method) {
+      method = conf.method.toUpperCase();
     }
     if (!('autoId' in conf)) {
-      obj.autoId = false;
+      autoId = conf.autoId;
     }
     const url = this._urlComposer({ path: conf.path });
     const request = this._request({
       url,
-      ...obj,
+      method,
+      payload,
+      autoId,
+    });
+    return request;
+  }
+
+  /**
+   * Delete data
+   * */
+  public deleteData(path: string) {
+    const method = 'DELETE';
+    const url = this._urlComposer({ path });
+    const request = this._request({
+      url,
+      method,
+      autoId: false,
     });
     return request;
   }
