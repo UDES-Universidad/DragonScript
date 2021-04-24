@@ -34,19 +34,29 @@ class Server {
 
   /**
    * Return a view.
+   * There are two ways to manage the routes:
+   * 1. By parameter.
+   * 2. By URL.
    * */
   public static response(req: RequestGetInterface | RequestPostInterface) {
     const props = webAppSettings_();
-    const pathInfo = 'pathInfo' in req ? req.pathInfo : '';
-    req.pathInfo = pathInfo;
     const debug = Number(props.debug);
+    if (props.routeMehtod === 'parameter') {
+      const { pathParam } = props;
+      req.pathInfo =
+        pathParam in req.parameter ? req.parameter[pathParam] : '/';
+    } else if (props.routeMehtod === 'url') {
+      req.pathInfo = 'pathInfo' in req ? req.pathInfo : '';
+    } else {
+      throw new Error('There is not route method selected.');
+    }
     if (debug) {
       urls_();
-      return this._router.getRouteByPath(pathInfo).view(req);
+      return this._router.getRouteByPath(req.pathInfo).view(req);
     }
     try {
       urls_();
-      return this._router.getRouteByPath(pathInfo).view(req);
+      return this._router.getRouteByPath(req.pathInfo).view(req);
     } catch (error) {
       return Server.sendError(500, error.message);
     }

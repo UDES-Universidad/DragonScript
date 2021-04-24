@@ -2,6 +2,7 @@
  * Router module.
  * */
 import webAppSettings_ from './defaultSettings';
+import { routeNotFoundView } from './routeViews';
 
 interface RouteInterface {
   name: string;
@@ -17,6 +18,14 @@ class RouterSingleton {
   private static instance: RouterSingleton;
 
   private _routes: (RouteInterface | [string, RouteInterface[]])[] = [];
+
+  /**
+   * If no route found then redirect to this view.
+   * @param request ({ [keys: string]: string }): is object obtained from doGet or doPost method.
+   * @param template (string): path to template file.
+   * @param context ({ [keys: string]: string }): data to be passed to template.
+   * */
+  public routeNotFound = routeNotFoundView;
 
   /**
    * Get a RouterSingleton instance.
@@ -47,6 +56,7 @@ class RouterSingleton {
 
   /**
    * Join paths.
+   * @param parts (string[]): strings to create a route.
    * */
   private _joinPaths(parts: string[]) {
     let result = '';
@@ -59,8 +69,8 @@ class RouterSingleton {
   }
 
   /**
-   * Return url web app depending on whether a
-   * ScriptPropertiescript.debug is in 0 (false) or 1 (true).
+   * Return URL web app depending on if a
+   * settings_().debug is in 0 (false) or 1 (true).
    * */
   public getScriptUrl() {
     const props = webAppSettings_();
@@ -69,13 +79,16 @@ class RouterSingleton {
       return props.urlDev;
     }
     if (props.urlProd) {
-      return props.urlProd
+      return props.urlProd;
     }
     return ScriptApp.getService().getUrl();
   }
 
   /**
    * Add simple route.
+   * @param name (string): name of route.
+   * @param path (string): route.
+   * @param view (template view): function to serve content.
    * */
   public addRoute(route: RouteInterface) {
     if (typeof route !== 'object' && Array.isArray(route))
@@ -94,6 +107,17 @@ class RouterSingleton {
 
   /**
    * Add a set of routes.
+   * @param routes ([string, RouteInterface[]]): a set of routes.
+   * Example: [
+   *    routeName,
+   *    [
+   *      {
+   *        name: string,
+   *        path: string,
+   *        view: viewFunction,
+   *      }...
+   *    ]
+   * ]
    * */
   public addGroupRoutes(routes: [string, RouteInterface[]]) {
     if (Array.isArray(routes)) {
@@ -108,44 +132,13 @@ class RouterSingleton {
   }
 
   /**
-   * If no route found.
-   * */
-  public routeNotFound(request: {}, template: string, context?: {}) {
-    const {
-      favicon,
-      title,
-      metaViewPort,
-      error404Template,
-    } = webAppSettings_();
-    let output;
-    if (template || error404Template) {
-      const resp = HtmlService.createTemplateFromFile(
-        template || error404Template
-      );
-      const keys = context ? Object.keys(context) : [];
-      if (keys.length > 0) {
-        keys.forEach((key) => {
-          resp[key] = context[key];
-        });
-      }
-      output = resp.evaluate();
-    } else {
-      output = HtmlService.createHtmlOutput('<h1>404 not found</h1>');
-    }
-    if (metaViewPort) output.addMetaTag('viewport', metaViewPort);
-    if (favicon) output.setFaviconUrl(favicon);
-    if (title) output.setTitle(title);
-    if (context && context.hasOwnProperty('setTitle'))
-      output.setTitle(context.setTile);
-    return output;
-  }
-
-  /**
    * Get a route from name that can be used in two ways:
    * 1. single path name, for example: myRouteName.
    * 2. group: groupName:routeName, that is a set of routes.
+   * @param name (string): route name.
    * */
   public getRouteByName(name: string): RouteInterface {
+    // Group routes.
     if (name.includes(':')) {
       const [groupName, routeName] = name.trim().split(':');
       const groupRoutes = this._getRoutesByMode('group').filter(
@@ -156,15 +149,18 @@ class RouterSingleton {
           (i: RouteInterface) => i.name === routeName
         );
         if (routes.length > 0) {
+          // Creates a partial route.
           routes[0].__path__ = this._joinPaths([groupName, routes[0].path]);
           return routes[0];
         }
       }
+      // Single route.
     } else {
       const routes = this._getRoutesByMode('single').filter(
         (i: RouteInterface) => i.name === name
       );
       if (routes.length > 0) {
+        // Creates a partial route.
         routes[0].__path__ = routes[0].path;
         return routes[0];
       }
@@ -173,7 +169,8 @@ class RouterSingleton {
   }
 
   /**
-   * Get a route by path.
+   * Get a route by path. This method is used by server class in doGet and doPost functions
+   * for return a correct view.
    * */
   public getRouteByPath(pathInfo: string): RouteInterface {
     let path = pathInfo || '';
@@ -212,10 +209,16 @@ class RouterSingleton {
    * */
   public getUrlByName(name: string) {
     const props = webAppSettings_();
-    let route = this.getRouteByName(name);
-    route = route.__path__ ? `/${route.__path__}` : '';
     const urlBase = this.getScriptUrl();
-    return `${urlBase}${route}`;
+    const route = this.getRouteByName(name);
+    let subroute;
+    if (props.routeMehtod === 'parameter') {
+      subroute = route.__path__ ? `?${props.pathParam}=${route.__path__}` : '';
+    }
+    if (props.routeMehtod === 'url') {
+      subroute = route.__path__ ? `/${route.__path__}` : '';
+    }
+    return `${urlBase}${subroute}`;
   }
 }
 

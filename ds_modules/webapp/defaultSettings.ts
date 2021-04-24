@@ -8,6 +8,8 @@ interface webAppSettingsInter {
   error404Template: string;
   redirectTemplate: string;
   componentPaths: string[];
+  routeMehtod: 'parameter' | 'url';
+  pathParam: string;
 }
 
 function webAppSettings_() {
@@ -20,7 +22,9 @@ function webAppSettings_() {
     error404Template: '',
     metaViewPort: 'width=device-width, initial-scale=1.0',
     redirectTemplate: 'ds_modules/webapp/templates/redirect.html',
-    componentPaths: ['src', 'src/components'],
+    componentPaths: ['templates', 'templates/components'],
+    routeMehtod: 'url',
+    pathParam: 'path',
   };
   try {
     const customSettings: { [keys: string]: any } = settings_();
