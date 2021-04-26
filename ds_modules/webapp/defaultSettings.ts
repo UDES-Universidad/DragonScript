@@ -8,7 +8,7 @@ interface webAppSettingsInter {
   error404Template: string;
   redirectTemplate: string;
   componentPaths: string[];
-  routeMehtod: 'parameter' | 'url';
+  routeMethod: 'parameter' | 'url';
   pathParam: string;
 }
 
@@ -23,7 +23,7 @@ function webAppSettings_() {
     metaViewPort: 'width=device-width, initial-scale=1.0',
     redirectTemplate: 'ds_modules/webapp/templates/redirect.html',
     componentPaths: ['templates', 'templates/components'],
-    routeMehtod: 'url',
+    routeMethod: 'url',
     pathParam: 'path',
   };
   try {
@@ -36,6 +36,7 @@ function webAppSettings_() {
     Logger.log(e);
   }
 
+  Logger.log(data);
   return data;
 }
 

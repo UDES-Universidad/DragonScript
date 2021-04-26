@@ -41,11 +41,11 @@ class Server {
   public static response(req: RequestGetInterface | RequestPostInterface) {
     const props = webAppSettings_();
     const debug = Number(props.debug);
-    if (props.routeMehtod === 'parameter') {
+    if (props.routeMethod === 'parameter') {
       const { pathParam } = props;
       req.pathInfo =
         pathParam in req.parameter ? req.parameter[pathParam] : '/';
-    } else if (props.routeMehtod === 'url') {
+    } else if (props.routeMethod === 'url') {
       req.pathInfo = 'pathInfo' in req ? req.pathInfo : '';
     } else {
       throw new Error('There is not route method selected.');

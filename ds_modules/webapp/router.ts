@@ -15,6 +15,11 @@ interface RouteInterface {
  * Router.
  * */
 class RouterSingleton {
+  private _routeMethods = {
+    parameter: 'parameter',
+    url: 'url',
+  };
+
   private static instance: RouterSingleton;
 
   private _routes: (RouteInterface | [string, RouteInterface[]])[] = [];
@@ -212,10 +217,11 @@ class RouterSingleton {
     const urlBase = this.getScriptUrl();
     const route = this.getRouteByName(name);
     let subroute;
-    if (props.routeMehtod === 'parameter') {
+    Logger.log(props.routeMethod);
+    if (props.routeMethod === this._routeMethods.parameter) {
       subroute = route.__path__ ? `?${props.pathParam}=${route.__path__}` : '';
     }
-    if (props.routeMehtod === 'url') {
+    if (props.routeMethod === this._routeMethods.url) {
       subroute = route.__path__ ? `/${route.__path__}` : '';
     }
     return `${urlBase}${subroute}`;
