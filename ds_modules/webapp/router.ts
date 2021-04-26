@@ -217,7 +217,6 @@ class RouterSingleton {
     const urlBase = this.getScriptUrl();
     const route = this.getRouteByName(name);
     let subroute;
-    Logger.log(props.routeMethod);
     if (props.routeMethod === this._routeMethods.parameter) {
       subroute = route.__path__ ? `?${props.pathParam}=${route.__path__}` : '';
     }

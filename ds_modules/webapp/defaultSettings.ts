@@ -36,7 +36,6 @@ function webAppSettings_() {
     Logger.log(e);
   }
 
-  Logger.log(data);
   return data;
 }
 
