@@ -1,5 +1,5 @@
-import {ConfParamsGssRow, GssRow} from "./gssRowBuilder";
-import {AbstractColumn} from "./gssColumnCreator";
+import { ConfParamsGssRow, GssRow } from './gssRowBuilder';
+import { AbstractColumn } from './gssColumnCreator';
 
 /*
  * OBJECTS
@@ -20,7 +20,7 @@ interface ConfParamsObjects {
 
 /*
  * This interface is for mayor data getters
- * as getAll or filter. 
+ * as getAll or filter.
  * */
 interface ConfMayorDataGetters {
   reverse?: boolean;
@@ -39,8 +39,7 @@ interface ConfRowGenerator {
 /*
  * Interface for geAll method.
  * */
-interface ConfGetAll extends ConfMayorDataGetters {
-}
+interface ConfGetAll extends ConfMayorDataGetters {}
 
 /*
  * Interface for filter method.
@@ -60,7 +59,7 @@ interface ConfGetBySheetRange extends ConfMayorDataGetters {
 /**
  * It is used for row creation.
  * @param data (any[]): dato for row.
- * @param row (number): row number.  
+ * @param row (number): row number.
  * */
 interface ConfLocalCreationRow {
   data: any[];
@@ -98,12 +97,12 @@ export default class GssObjectsCreator {
   get Rows() {
     return this._rows;
   }
-  
+
   /**
    * Creates an GssObjectsCreator instance.
-   * @param rows (GssRow[]): array of GssRow instances, this array 
-   * will be used to avoid bringing back the data from 
-   * the spreadsheet. 
+   * @param rows (GssRow[]): array of GssRow instances, this array
+   * will be used to avoid bringing back the data from
+   * the spreadsheet.
    * */
   private _ObjectsCreator(rows: GssRow[]) {
     return new GssObjectsCreator({
@@ -111,7 +110,7 @@ export default class GssObjectsCreator {
       rows,
       sheet: this._sheet,
       table: this._table,
-    })
+    });
   }
 
   /**
@@ -122,9 +121,9 @@ export default class GssObjectsCreator {
    * @param row (number): row number.
    * */
   private _createRow(dataforRow: ConfLocalCreationRow) {
-    let conf: ConfParamsGssRow = {
+    const conf: ConfParamsGssRow = {
       maxLength: this._table.length,
-      columnsMap: this._columnsMap, 
+      columnsMap: this._columnsMap,
       ...dataforRow,
     };
     return new this._rowBuilder(conf);
@@ -140,9 +139,13 @@ export default class GssObjectsCreator {
       const columnNumber = this._columnsMap[columnName];
       const validator = this._table[columnNumber];
       if (index === 0) {
-        statement += `row.getVal('${columnName}') === ${validator.chain(value)}`;
+        statement += `row.getVal('${columnName}') === ${validator.chain(
+          value
+        )}`;
       } else {
-        statement += ` && row.getVal('${columnName}') === '${validator.chain(value)}'`;
+        statement += ` && row.getVal('${columnName}') === '${validator.chain(
+          value
+        )}'`;
       }
     });
     return statement;
@@ -153,18 +156,24 @@ export default class GssObjectsCreator {
    * as a array of GssRow, and removes the first row.
    * */
   private _retrieveDataFromTable() {
-    this._rows = this._rows && this._rows.length > 0 
-      ? this._rows
-      : this._sheet.getDataRange().getValues().map((data: any[], index: number) => this._createRow({
-        row: index + 1,
-        data,
-      }));
+    this._rows =
+      this._rows && this._rows.length > 0
+        ? this._rows
+        : this._sheet
+            .getDataRange()
+            .getValues()
+            .map((data: any[], index: number) =>
+              this._createRow({
+                row: index + 1,
+                data,
+              })
+            );
     this._rows.shift();
     return this._rows;
   }
 
   /*
-   * Returns a validator, it is used to specify 
+   * Returns a validator, it is used to specify
    * that the data to save is the correct data type.
    * */
   private _validator(column: number): AbstractColumn {
@@ -176,7 +185,9 @@ export default class GssObjectsCreator {
    * @param row: instance of gssRow.
    * */
   public saveRow(row: GssRow) {
-    const dataToSave = row.data.map((value, index) => this._validator(index).validate(value));
+    const dataToSave = row.data.map((value, index) =>
+      this._validator(index).validate(value)
+    );
     if (row.row) {
       const range = this._sheet.getRange(row.row, 1, 1, row.data.length);
       range.setValues([dataToSave]);
@@ -203,8 +214,12 @@ export default class GssObjectsCreator {
    * @param rowNumber (number): row number.
    * */
   public getRowByNumber(rowNumber: number): GssRow {
-    const range = this._sheet
-      .getRange(rowNumber, 1, 1, this._sheet.getLastColumn());
+    const range = this._sheet.getRange(
+      rowNumber,
+      1,
+      1,
+      this._sheet.getLastColumn()
+    );
     const values = range.getValues();
     return this._createRow({
       row: rowNumber,
@@ -223,24 +238,40 @@ export default class GssObjectsCreator {
   public *rowGenerator(conf: ConfRowGenerator) {
     let loop = 0;
     let index = 0;
-    const startAtRow = conf && 'startAtRow' in conf 
-      ? conf.startAtRow 
-      : 2;
-    const reverse = conf && 'reverse' in conf 
-      ? conf.reverse 
-      : false;
+    let startAtRow = conf && 'startAtRow' in conf ? conf.startAtRow : 2;
+    const reverse = conf && 'reverse' in conf ? conf.reverse : false;
     let rowsNumber;
     if (conf && 'startAtRow' in conf && 'rowsNumber' in conf) {
-      rowsNumber = conf.rowsNumber <= this._sheet.getLastRow()
-        ? conf.rowsNumber
-        : this._sheet.getLastRow();
+      rowsNumber =
+        conf.rowsNumber <= this._sheet.getLastRow()
+          ? conf.rowsNumber
+          : this._sheet.getLastRow();
+    } else if (conf && 'startAtRow' in conf && !('rowsNumber' in conf)) {
+      rowsNumber =
+        'reverse' in conf
+          ? conf.startAtRow - 1
+          : this._sheet.getLastRow() + 1 - conf.startAtRow;
+    } else if (
+      !('startAtRow' in conf) &&
+      'rowsNumber' in conf &&
+      'reverse' in conf &&
+      conf.reverse
+    ) {
+      startAtRow = this._sheet.getLastRow();
+      rowsNumber =
+        conf.rowsNumber <= startAtRow
+          ? conf.rowsNumber
+          : this._sheet.getLastRow();
+    } else if (
+      !('startAtRow' in conf) &&
+      !('rowsNumber' in conf) &&
+      'reverse' in conf &&
+      conf.reverse
+    ) {
+      startAtRow = this._sheet.getLastRow();
     }
-    if (conf && 'startAtRow' in conf && !('rowsNumber' in conf)) {
-      rowsNumber = 'reverse' in conf
-        ? conf.startAtRow - 1
-        : (this._sheet.getLastRow() + 1) - conf.startAtRow;
-    }
-    if (!conf) {
+
+    if (!conf || !('rowsNumber' in conf) || !rowsNumber) {
       rowsNumber = this._sheet.getLastRow() - 1;
     }
     while (loop < rowsNumber) {
@@ -249,9 +280,9 @@ export default class GssObjectsCreator {
       } else {
         index = startAtRow + loop;
       }
-      const data = this._sheet.getRange(
-        index, 1, 1, this._sheet.getLastColumn(),
-      ).getValues()[0];
+      const data = this._sheet
+        .getRange(index, 1, 1, this._sheet.getLastColumn())
+        .getValues()[0];
       yield this._createRow({
         row: index,
         data,
@@ -262,17 +293,18 @@ export default class GssObjectsCreator {
 
   /*
    * Return all data by two strategies:
-   * 1. Brute: get all data of table as a snapshot and transforms 
+   * 1. Brute: get all data of table as a snapshot and transforms
    * it in to a array of GssRow.
-   * 2. Generator: Get row by row from Spreadsheet with method 
+   * 2. Generator: Get row by row from Spreadsheet with method
    * Sheet.getRange().getValues(), this allows return the most recent value
-   * of row. Every yield return a GssRow. This strategy could be slowly. All 
+   * of row. Every yield return a GssRow. This strategy could be slowly. All
    * rows are saved in the property _rows.
    * */
   public getAll(conf?: ConfGetAll) {
     let rows = this._retrieveDataFromTable();
     if (conf) {
-      if('slice' in conf && conf.slice.length > 0) rows = rows.slice(...conf.slice);
+      if ('slice' in conf && conf.slice.length > 0)
+        rows = rows.slice(...conf.slice);
       if ('reverse' in conf && conf.reverse) rows.reverse();
     }
     return this._ObjectsCreator(rows);
@@ -287,14 +319,15 @@ export default class GssObjectsCreator {
    * */
   public filter(conf?: ConfFilterData) {
     this._rows = this._retrieveDataFromTable();
-    let indexes = Array.from(Array(this._rows.length).keys()); 
-    let results: GssRow[] = [];
+    let indexes = Array.from(Array(this._rows.length).keys());
+    const results: GssRow[] = [];
     const statement = this._searchStatement(Object.entries(conf.search));
     if (conf) {
-      if('slice' in conf && conf.slice.length > 0) indexes = indexes.slice(...conf.slice);
+      if ('slice' in conf && conf.slice.length > 0)
+        indexes = indexes.slice(...conf.slice);
       if ('reverse' in conf && conf.reverse) indexes.reverse();
     }
-    indexes.forEach(i => {
+    indexes.forEach((i) => {
       const row = this._rows[i];
       if (eval(statement)) results.push(row);
     });
@@ -302,31 +335,35 @@ export default class GssObjectsCreator {
   }
 
   /*
-   * Gets data from sheet by a custom range, 
+   * Gets data from sheet by a custom range,
    * and it can search terms.
    * */
   public GetBySheetRange(conf: ConfGetBySheetRange) {
     const results: GssRow[] = [];
-    const statement = 'search' in conf 
-      ? this._searchStatement(Object.entries(conf.search))
-      : "";
-    let rows = this._sheet.getRange(...conf.range).getValues()
-      .map((data: any[], index: number) => {
-      return this._createRow({
-        data,
-        row: index + 1,
-      });
-    });
+    const statement =
+      'search' in conf
+        ? this._searchStatement(Object.entries(conf.search))
+        : '';
+    let rows = this._sheet
+      .getRange(...conf.range)
+      .getValues()
+      .map((data: any[], index: number) =>
+        this._createRow({
+          data,
+          row: index + 1,
+        })
+      );
     if (conf) {
-      if('slice' in conf && conf.slice.length > 0) rows = rows.slice(...conf.slice);
+      if ('slice' in conf && conf.slice.length > 0)
+        rows = rows.slice(...conf.slice);
       if ('reverse' in conf && conf.reverse) rows.reverse();
     }
-    if (statement){
+    if (statement) {
       rows.forEach((row: GssRow) => {
         if (eval(statement)) results.push(row);
       });
       return this._ObjectsCreator(results);
-    } 
+    }
     return this._ObjectsCreator(this._rows);
   }
 
