@@ -8,7 +8,6 @@ export interface ConfAbstractColumn {
   functionValidators?: ((value: any) => any)[];
 }
 
-
 /*
  * AbstractColumn class.
  * */
@@ -39,7 +38,7 @@ export abstract class AbstractColumn {
   public abstract chain(value: any): any;
 
   /*
-   * Assigns values to column properties. 
+   * Assigns values to column properties.
    * */
   public asignValues(conf: ConfAbstractColumn) {
     this.name = conf.name;
@@ -56,10 +55,13 @@ export abstract class AbstractColumn {
    * Run functions that extra validate or transform
    * a value to be saved.
    * */
-  protected _extraValidators(valueTarget: any, functions: ((value: any) => any)[]): any {
-    let value = valueTarget; 
+  protected _extraValidators(
+    valueTarget: any,
+    functions: ((value: any) => any)[]
+  ): any {
+    let value = valueTarget;
     if (functions && functions.length > 0) {
-      functions.forEach(fn => {
+      functions.forEach((fn) => {
         value = fn(value);
       });
     }
@@ -74,7 +76,7 @@ export class GenericColumn extends AbstractColumn {
   public static create(values: ConfAbstractColumn): GenericColumn {
     return new GenericColumn().asignValues(values);
   }
-  
+
   public validate(value: any): any {
     return value;
   }
@@ -89,10 +91,20 @@ export class StringColumn extends AbstractColumn {
   }
 
   public validate(value: string): string {
-    if (this.required && !value) throw new Error(`Fn: StringColumn, column: ${this.column}, value is required`);
+    if (this.required && !value) {
+      throw new Error(
+        `Fn: StringColumn, column: ${this.column}, value is required`
+      );
+    }
     if (!value && this.defaultValue) return this.defaultValue;
     if (this.forceConvertion) return String(value);
-    if (typeof value !== 'string') throw new Error(`Column ${this.column} must be a string but it receibed a ${typeof value}, value: ${value}`);
+    if (typeof value !== 'string') {
+      throw new Error(
+        `Column ${
+          this.column
+        } must be a string but it receibed a ${typeof value}, value: ${value}`
+      );
+    }
     return this._extraValidators(value, this.functionValidators);
   }
 
@@ -108,16 +120,23 @@ export class NumberColumn extends AbstractColumn {
   public static create(payload: {}): NumberColumn {
     return new NumberColumn().asignValues(payload);
   }
-  
+
   public bypass(value: any): number {
-    return String(value)
+    return String(value);
   }
 
   public validate(value: number): number {
-    if (this.required && !value) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
+    if (this.required && !value)
+      throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
     if (!value && this.defaultValue) return this.defaultValue;
     if (this.forceConvertion) return Number(value);
-    if (typeof value !== 'number') throw new Error(`Column ${this.column} must be a number but it receibed a ${typeof value}, value: ${value}`);
+    if (typeof value !== 'number') {
+      throw new Error(
+        `Column ${
+          this.column
+        } must be a number but it receibed a ${typeof value}, value: ${value}`
+      );
+    }
     return value;
   }
 
@@ -134,24 +153,40 @@ export class DateTimeColumn extends AbstractColumn {
 
   autoNow: boolean = false;
 
+  format: string = 'dd-MM-yyyy HH:mm:ss';
+
+  timeZone: string = 'GMT-6';
+
   public static create(payload: {}): DateTimeColumn {
     return new DateTimeColumn().asignValues(payload);
   }
 
+  private getGoogleDate(date?: Date) {
+    const _date = date || new Date();
+    return Utilities.formatDate(_date, this.timeZone, this.format);
+  }
+
   public validate(value: Date | string): Date | string {
-    if (this.required && !value) throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
-    if (this.autoNowAdd && !value) return new Date();
-    if (this.autoNow) return new Date();
-    if (value instanceof Date) return value;
+    if (this.required && !value)
+      throw new Error(`Fn: StringColumn, column:·${value}, value is required`);
+    if (this.autoNowAdd && !value) return this.getGoogleDate();
+    if (this.autoNow) return this.getGoogleDate();
+    if (value instanceof Date) {
+      return this.getGoogleDate(value);
+    }
     if (typeof value === 'string') {
       try {
-        return new Date(value);
+        return this.getGoogleDate(new Date(value));
       } catch (e) {
-        throw new Error(`Error: ${e}\n. Fn: DateTimeColumn, column: ${this.column}, value: ${value}`);
+        throw new Error(
+          `Error: ${e}\n. Fn: DateTimeColumn, column: ${this.column}, value: ${value}`
+        );
       }
     }
     if (!value) return '';
-    throw new Error(`Error: Value must be string or Date instance.\n. Fn: DateTimeColumn, column: ${this.column}, value: ${value}`);
+    throw new Error(
+      `Error: Value must be string or Date instance.\n. Fn: DateTimeColumn, column: ${this.column}, value: ${value}`
+    );
   }
 
   public chain(value: Date | string): string {
@@ -175,7 +210,11 @@ export class BooleanColumn extends AbstractColumn {
       if (value) return true;
       if (value === '') return false;
     }
-    throw new Error(`Column ${this.column} must be a string but it receibed a ${typeof value}, value: ${value}`);
+    throw new Error(
+      `Column ${
+        this.column
+      } must be a string but it receibed a ${typeof value}, value: ${value}`
+    );
   }
 
   public chain(value: boolean): string {

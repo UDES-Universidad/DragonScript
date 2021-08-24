@@ -1,5 +1,10 @@
 import {
-  ConfAbstractColumn, GenericColumn, StringColumn, NumberColumn, DateTimeColumn, BooleanColumn
+  ConfAbstractColumn,
+  GenericColumn,
+  StringColumn,
+  NumberColumn,
+  DateTimeColumn,
+  BooleanColumn,
 } from './gssColumnCreator';
 
 /*

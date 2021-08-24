@@ -26,7 +26,7 @@ Import a **gssClient** and **gssColumnFactory** in myModule/tables.ts to create 
     import GssClient from '../ds_modules/gss/gssClient';
 
     const mytableZombie = () => {
-      gssClient.create({
+      return gssClient.create({
         // URL or id of your Spreadsheet, nothing if you are using
         // a app script embebed in a Spreadsheet.
         urlOrId: '',
@@ -60,7 +60,8 @@ Now, lets fun. We will search all users with more than 25 years and convert them
       const table = mytableZombie.Objects();
       const rows = table.rowGenerator();
       while(true) {
-        const [done, value] = rows.next();
+        row = rows.next();
+        const {done, value} = row;
         if (done) break;
         if (value.getVal('age') > 25) {
           value.setVal('isZombie', true)

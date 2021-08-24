@@ -252,6 +252,7 @@ export default class GssObjectsCreator {
           ? conf.startAtRow - 1
           : this._sheet.getLastRow() + 1 - conf.startAtRow;
     } else if (
+      conf &&
       !('startAtRow' in conf) &&
       'rowsNumber' in conf &&
       'reverse' in conf &&
@@ -263,6 +264,7 @@ export default class GssObjectsCreator {
           ? conf.rowsNumber
           : this._sheet.getLastRow();
     } else if (
+      conf &&
       !('startAtRow' in conf) &&
       !('rowsNumber' in conf) &&
       'reverse' in conf &&
