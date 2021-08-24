@@ -57,15 +57,16 @@ Now, lets fun. We will search all users with more than 25 years and convert them
     import mytableZombie from './tables'
 
     const createZombies = () => {
-      const table = mytableZombie.Objects();
-      const rows = table.rowGenerator();
+      const table = mytableZombie();
+      objects = table.Objects();
+      const rows = objects.rowGenerator();
       while(true) {
         row = rows.next();
         const {done, value} = row;
         if (done) break;
         if (value.getVal('age') > 25) {
           value.setVal('isZombie', true)
-          table.save(value);
+          objects.save(value);
         }
       }
     }
