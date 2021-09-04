@@ -5,10 +5,9 @@ import * as fse from 'fs-extra';
  * Handle all file and directory operations.
  */
 export default class FileHandler {
-
   /**
-   * 
-   * @param steps {number} 
+   *
+   * @param steps {number}
    * @returns {string} directory name.
    */
   private static getNestedDir(steps: number): string {
@@ -26,7 +25,7 @@ export default class FileHandler {
   }
 
   /**
-   * 
+   *
    * @returns Returns current directory.
    */
   public static DragonManagerDir(): string {
@@ -36,13 +35,17 @@ export default class FileHandler {
   /**
    * Copy file.
    */
-  public static async copyFile(src: string, dest: string, verbose=false): Promise<boolean> {
+  public static async copyFile(
+    src: string,
+    dest: string,
+    verbose = false
+  ): Promise<boolean> {
     const fileName = path.basename(src);
     try {
       await fse.copyFile(src, dest, fse.constants.COPYFILE_EXCL);
       if (verbose) console.log(`COPY SUCCESS: File ${src} -> ${dest}`);
       return true;
-    } catch(e: any) {
+    } catch (e: any) {
       if (verbose) console.log(e.message);
       return false;
     }
@@ -51,15 +54,38 @@ export default class FileHandler {
   /**
    * Copy directories.
    */
-  public static async copyDir(src: string, dest: string, verbose=false): Promise<boolean> {
-    try {  
+  public static async copyDir(
+    src: string,
+    dest: string,
+    verbose = false
+  ): Promise<boolean> {
+    try {
       fse.copy(src, dest);
-      console.log(`$`)
+      console.log(`$`);
       if (verbose) console.log(`COPY SUCCESS: ${src} -> ${dest}.`);
       return true;
     } catch (e: any) {
       if (verbose) console.log(e.message);
       return false;
+    }
+  }
+
+  /**
+   * Create a directory.
+   */
+  public static createDir(dir: string) {
+    const dirExists = fse.existsSync(dir);
+
+    if (dirExists) fse.mkdirSync(dir, { recursive: true });
+  }
+
+  /**
+   * Move files.
+   */
+  public static moveFile(src: string, dest: string) {
+    const destDirName = path.dirname(dest);
+    if (fse.existsSync(src) && destDirName) {
+      fse.renameSync(src, dest);
     }
   }
 }
