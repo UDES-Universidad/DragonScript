@@ -36,4 +36,9 @@ class ClaspFacade {
    * Clone project.
    */
   public static clone() {}
+
+  /**
+   *
+   */
+  public static pull() {}
 }
