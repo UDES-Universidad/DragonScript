@@ -1,6 +1,7 @@
 export default class Settings {
   public static dsModulesDir = 'ds_modules';
 
+  /** DS Modules */
   public static dsModules = [
     'adminSDK',
     'gdocs',
