@@ -11,7 +11,7 @@ export class DragonStarter {
     this.currentDir = cwd();
 
     this.argParse = new ArgumentParser({
-      description: 'DragonScript, GAS supercharged 🔥️!!!',
+      description: '🔥️ DragonScript, GAS supercharged 🔥️!!!',
     });
 
     const mainCommand = argv[2];
@@ -43,14 +43,7 @@ export class DragonStarter {
   }
 
   private create() {
-    this.argParse.add_argument('-m', '--modules', {
-      help: 'Choose some DragonScript modules',
-      type: 'str',
-    });
-
-    const args = this.argParse.parse_args();
-
-    CreateProject.create(args);
+    CreateProject.create(this.argParse);
   }
 
   private pull() {}
