@@ -11,26 +11,14 @@ import { get as promptGet, start as promptStart } from 'prompt';
 interface ArgsInter {
   type: string;
   modules: string[];
+  name: string;
 }
 
 export class CreateProject {
   private args: ArgsInter;
 
   constructor(argParse: ArgumentParser) {
-    argParse.add_argument('-m', '--modules', {
-      help: 'Choose some DragonScript modules',
-      type: 'str',
-      action: 'append',
-      choices: Settings.dsModules,
-    });
-
-    this.args = argParse.parse_args();
-
-    if (!this.args['modules']) {
-      this.args.modules = [];
-      this.instructionsModule();
-      this.getModules();
-    }
+    this.run(argParse);
   }
 
   /**
@@ -42,36 +30,69 @@ export class CreateProject {
     return new CreateProject(argParse);
   }
 
-  /**
-   * Show module instructions.
-   */
-  public instructionsModule() {
-    const txt = `Select some module:\n${Settings.dsModules
-      .sort()
-      .map((v, i) => `  ${i}. ${v}`)
-      .join('\n')}`;
-    console.log(`${txt}\n  q: omit / quit \n  s: show modules`);
+  private async run(argParse: ArgumentParser) {
+    argParse.add_argument('-m', '--modules', {
+      help: 'Choose some DragonScript modules',
+      type: 'str',
+      action: 'append',
+      choices: Settings.dsModules,
+    });
+
+    argParse.add_argument('-n', '--name', {
+      help: 'Set project name',
+      type: 'str',
+      action: 'store',
+    });
+
+    this.args = argParse.parse_args();
+
+    if (!this.args['name']) {
+      this.args.name = '';
+      await this.setProjectName();
+    }
+
+    if (!this.args['modules']) {
+      this.args.modules = [];
+      await this.setModules();
+    }
   }
 
   /**
    *
    * @param question {string}: Question to show.
    */
-  public async doQuestion(question: { [keys: string]: any }[]) {
+  private async doQuestion(question: { [keys: string]: any }[]) {
     promptStart();
     const _question = await promptGet(question);
     return _question;
   }
 
-  /** Check if DS Module exists. */
-  public moduleExists(pkg: string) {
-    return Settings.dsModules.includes(pkg);
+  private async setProjectName() {
+    let instructions = `Select a project name:`;
+
+    let { name } = await this.doQuestion([
+      {
+        name: 'name',
+        message: 'Project name',
+      },
+    ]);
+
+    this.args.name = name;
   }
 
   /**
    * This function is executed if there is no DS module
    */
-  public async getModules() {
+  private async setModules() {
+    let instructions = `Select some module:\n${Settings.dsModules
+      .sort()
+      .map((v, i) => `  ${i}. ${v}`)
+      .join('\n')}`;
+
+    instructions = `${instructions}\n  q: omit / quit \n  s: show modules`;
+
+    console.log(instructions);
+
     while (true) {
       let { pkg } = await this.doQuestion([
         {
@@ -83,7 +104,7 @@ export class CreateProject {
       if (pkg === 'q') break;
 
       if (pkg === 's') {
-        this.instructionsModule();
+        console.log(instructions);
         continue;
       }
 
