@@ -15,7 +15,11 @@ interface ArgsInter {
 }
 
 export class CreateProject {
-  private args: ArgsInter;
+  private args: ArgsInter = {
+    type: '',
+    modules: [],
+    name: '',
+  };
 
   constructor(argParse: ArgumentParser) {
     this.run(argParse);
@@ -70,6 +74,8 @@ export class CreateProject {
   private async setProjectName() {
     let instructions = `Select a project name:`;
 
+    console.log(instructions);
+
     let { name } = await this.doQuestion([
       {
         name: 'name',
@@ -77,7 +83,7 @@ export class CreateProject {
       },
     ]);
 
-    this.args.name = name;
+    this.args.name = <string>name;
   }
 
   /**
@@ -97,7 +103,7 @@ export class CreateProject {
       let { pkg } = await this.doQuestion([
         {
           name: 'pkg',
-          message: 'Module name',
+          message: 'Select module number',
         },
       ]);
 
