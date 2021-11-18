@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+//import FileHandler from './modules/files';
+//import PackageInstaller from './modules/package_installer';
 Object.defineProperty(exports, "__esModule", { value: true });
-const package_installer_1 = __importDefault(require("./modules/package_installer"));
-package_installer_1.default.install();
+const entry_point_1 = require("./modules/entry_point");
+//PackageInstaller.install();
+entry_point_1.DragonStarter.start();

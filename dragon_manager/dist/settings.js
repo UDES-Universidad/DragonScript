@@ -4,6 +4,7 @@ class Settings {
 }
 exports.default = Settings;
 Settings.dsModulesDir = 'ds_modules';
+/** DS Modules */
 Settings.dsModules = [
     'adminSDK',
     'gdocs',
@@ -16,21 +17,22 @@ Settings.dsModules = [
     'utils',
     'webapp',
 ];
-Settings.gastDir = 'gas';
-Settings.gasFiles = [
-    '.clasp.json',
-    '.claspignore',
-    '.eslintrc,js',
-    '.gitignore',
-    '.prettierrc.json',
-    'appsscript.json',
-    'init_node.bash',
-    'tsconfig.json',
-];
+Settings.gasDir = 'gas';
 Settings.nodePackages_dev = [
+    '@types/google-apps-script',
+    '@typescript-eslint/eslint-plugin',
     'eslint',
     'eslint-config-airbnb-typescript',
     'eslint-plugin-import',
-    '@typescript-eslint/eslint-plugin',
+    'typescript',
 ];
-Settings.nodePackages_prod = ['@types/google-apps-script'];
+Settings.nodePackages_prod = [];
+Settings.gasTypes = [
+    'standalone',
+    'docs',
+    'sheets',
+    'slides',
+    'forms',
+    'webapp',
+    'api',
+];

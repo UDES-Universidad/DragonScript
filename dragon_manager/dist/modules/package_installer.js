@@ -20,6 +20,7 @@ class PackageInstaller {
         return [this.npm, _commandType, ...packages].join(' ').trim();
     }
     execCommands() {
+        (0, child_process_1.execSync)('npm init -y');
         let commands = [
             this.commandBuilder('dev', [...settings_1.default.nodePackages_dev]),
             this.commandBuilder('prod', [...settings_1.default.nodePackages_prod]),

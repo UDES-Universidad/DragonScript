@@ -88,7 +88,7 @@ class FileHandler {
      */
     static createDir(dir) {
         const dirExists = fse.existsSync(dir);
-        if (dirExists)
+        if (!dirExists)
             fse.mkdirSync(dir, { recursive: true });
     }
     /**
@@ -99,6 +99,38 @@ class FileHandler {
         if (fse.existsSync(src) && destDirName) {
             fse.renameSync(src, dest);
         }
+    }
+    /**
+     * Remove file or directory
+     * @param src {string}
+     */
+    static remove(src) {
+        if (fse.existsSync(src)) {
+            fse.removeSync(src);
+        }
+    }
+    /**
+     *
+     * @param dir {string} Target directory
+     * @returns {string []}: Array of files.
+     */
+    static listDir(dir) {
+        if (fse.existsSync(dir)) {
+            return fse.readdirSync(dir);
+        }
+        else {
+            throw new Error('lisDir: Directory not exists.');
+        }
+    }
+    static readJSON(fileName) {
+        return fse.readJsonSync(fileName, {
+            encoding: 'utf-8',
+        });
+    }
+    static writeJSON(fileName, data) {
+        fse.writeJSONSync(fileName, data, {
+            spaces: 2,
+        });
     }
 }
 exports.default = FileHandler;
