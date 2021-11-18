@@ -117,10 +117,10 @@ export class CreateProject {
       await this.setModules();
     }
 
-    this.directoryStructure();
-    this.installNodeModules();
-    this.createGASprojects();
-    this.dsModulesHandler();
+    await this.directoryStructure();
+    await this.createGASprojects();
+    await this.dsModulesHandler();
+    await this.installNodeModules();
   }
 
   /**
@@ -133,6 +133,9 @@ export class CreateProject {
     return _question;
   }
 
+  /**
+   * Project Name
+   */
   private async setProjectName() {
     let { name } = await this.doQuestion([
       {
@@ -145,6 +148,9 @@ export class CreateProject {
     this.args.name = <string>name;
   }
 
+  /**
+   * GAS Type.
+   */
   private async setGasType() {
     console.log(
       `GAS types: \n${Settings.gasTypes
@@ -177,6 +183,9 @@ export class CreateProject {
     }
   }
 
+  /**
+   * Parent ID.
+   */
   private async setParentId() {
     let { parentIdProd, parentIdDev } = await this.doQuestion([
       {
@@ -241,14 +250,15 @@ export class CreateProject {
   /**
    * Install Node Modules.
    */
-  private installNodeModules() {
+  private async installNodeModules() {
+    chdir(this.baseDir);
     PackageInstaller.install();
   }
 
   /**
    * Creates project directory structure.
    */
-  private directoryStructure() {
+  private async directoryStructure() {
     const projectName = this.args.name.replace(RegExp(' ', 'g'), '_');
 
     this.baseDir = joinPath(this.workDir, projectName);
@@ -280,7 +290,7 @@ export class CreateProject {
   /**
    * Create Dev and Prod GAS projects.
    */
-  private createGASprojects() {
+  private async createGASprojects() {
     const dragonConfig = joinPath(this.baseDir, 'dragonscript.config.json');
 
     const dragonConfigValues = FileHandler.readJSON(dragonConfig);
@@ -298,8 +308,9 @@ export class CreateProject {
 
     // Create Gas Projects
 
-    if (fse.existsSync(joinPath(this.devDirTmp, '.clasp.json'))) {
+    if (fse.existsSync(this.devDirTmp)) {
       chdir(this.prodDirTmp);
+      console.log(200);
       ClaspFacade.create({
         title: `${basenamePath(this.baseDir)}_prod`,
         type: this.args.gasType,
@@ -314,7 +325,7 @@ export class CreateProject {
       dragonConfigValues['prod']['rootDir'] = this.appDir;
     }
 
-    if (fse.existsSync(joinPath(this.devDirTmp, '.clasp.json'))) {
+    if (fse.existsSync(this.devDirTmp)) {
       chdir(this.devDirTmp);
       ClaspFacade.create({
         title: `${basenamePath(this.baseDir)}_dev`,
@@ -345,7 +356,10 @@ export class CreateProject {
     FileHandler.remove(this.devDirTmp);
   }
 
-  private dsModulesHandler() {
+  /**
+   * Put DS Modules.
+   */
+  private async dsModulesHandler() {
     const dsModules = joinPath(FileHandler.DragonManagerDir(), 'ds_modules');
 
     FileHandler.createDir(this.dsModulesDir);
@@ -361,7 +375,7 @@ export class CreateProject {
     for (const moduleName of this.args.modules) {
       FileHandler.copyDir(
         joinPath(dsModules, moduleName),
-        this.dsModulesDir,
+        joinPath(this.dsModulesDir, moduleName),
         true
       );
     }

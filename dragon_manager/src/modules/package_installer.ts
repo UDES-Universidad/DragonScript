@@ -16,6 +16,8 @@ export default class PackageInstaller {
   }
 
   private execCommands() {
+    execSync('npm init -y');
+
     let commands = [
       this.commandBuilder('dev', [...Settings.nodePackages_dev]),
       this.commandBuilder('prod', [...Settings.nodePackages_prod]),
