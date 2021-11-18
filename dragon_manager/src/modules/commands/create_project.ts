@@ -5,11 +5,12 @@
 import FileHandler from '../files';
 import Settings from '../../settings';
 import { ArgumentParser } from 'argparse';
-import { exit, stdin, stdout, cwd, chdir } from 'process';
+import { cwd, chdir } from 'process';
 import { get as promptGet, start as promptStart } from 'prompt';
 import ClaspFacade from '../clasp_facades';
 import { join as joinPath, basename as basenamePath } from 'path';
 import * as fse from 'fs-extra';
+import PackageInstaller from '../package_installer';
 
 type gasTypes =
   | 'standalone'
@@ -117,6 +118,7 @@ export class CreateProject {
     }
 
     this.directoryStructure();
+    this.installNodeModules();
     this.createGASprojects();
     this.dsModulesHandler();
   }
@@ -237,6 +239,13 @@ export class CreateProject {
   }
 
   /**
+   * Install Node Modules.
+   */
+  private installNodeModules() {
+    PackageInstaller.install();
+  }
+
+  /**
    * Creates project directory structure.
    */
   private directoryStructure() {
@@ -278,10 +287,10 @@ export class CreateProject {
 
     const claspFile = joinPath(this.baseDir, '.clasp.json');
 
-    // if (fse.existsSync(claspFile)) {
-    //   throw new Error('There is a GAS project already.');
-    //   return;
-    // }
+    if (fse.existsSync(claspFile)) {
+      throw new Error('There is a GAS project already.');
+      return;
+    }
 
     if (!fse.existsSync(this.prodDirTmp)) {
       throw new Error(`Directory ${this.prodDirTmp} not exists.`);
@@ -289,35 +298,39 @@ export class CreateProject {
 
     // Create Gas Projects
 
-    chdir(this.prodDirTmp);
-    // ClaspFacade.create({
-    //   title: `${basenamePath(this.baseDir)}_prod`,
-    //   type: this.args.gasType,
-    //   parentId: this.args.parentIdProd,
-    //   rootDir: '',
-    // });
+    if (fse.existsSync(joinPath(this.devDirTmp, '.clasp.json'))) {
+      chdir(this.prodDirTmp);
+      ClaspFacade.create({
+        title: `${basenamePath(this.baseDir)}_prod`,
+        type: this.args.gasType,
+        parentId: this.args.parentIdProd,
+        rootDir: '',
+      });
 
-    const prodClaspValues = FileHandler.readJSON(
-      joinPath(this.prodDirTmp, '.clasp.json')
-    );
-    dragonConfigValues['prod'] = prodClaspValues;
-    dragonConfigValues['prod']['rootDir'] = this.appDir;
+      const prodClaspValues = FileHandler.readJSON(
+        joinPath(this.prodDirTmp, '.clasp.json')
+      );
+      dragonConfigValues['prod'] = prodClaspValues;
+      dragonConfigValues['prod']['rootDir'] = this.appDir;
+    }
 
-    chdir(this.devDirTmp);
-    // ClaspFacade.create({
-    //   title: `${basenamePath(this.baseDir)}_dev`,
-    //   type: this.args.gasType,
-    //   parentId: this.args.parentIdDev,
-    //   rootDir: '',
-    // });
+    if (fse.existsSync(joinPath(this.devDirTmp, '.clasp.json'))) {
+      chdir(this.devDirTmp);
+      ClaspFacade.create({
+        title: `${basenamePath(this.baseDir)}_dev`,
+        type: this.args.gasType,
+        parentId: this.args.parentIdDev,
+        rootDir: '',
+      });
+
+      const devClaspValues = FileHandler.readJSON(
+        joinPath(this.devDirTmp, '.clasp.json')
+      );
+      dragonConfigValues['dev'] = devClaspValues;
+      dragonConfigValues['dev']['rootDir'] = this.appDir;
+    }
 
     chdir(this.baseDir);
-
-    const devClaspValues = FileHandler.readJSON(
-      joinPath(this.devDirTmp, '.clasp.json')
-    );
-    dragonConfigValues['dev'] = devClaspValues;
-    dragonConfigValues['dev']['rootDir'] = this.appDir;
 
     FileHandler.writeJSON(dragonConfig, dragonConfigValues);
 

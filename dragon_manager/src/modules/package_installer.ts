@@ -1,5 +1,4 @@
-import { exec, execSync } from 'child_process';
-import { stdin, stdout } from 'process';
+import { execSync } from 'child_process';
 import Settings from '../settings';
 
 export default class PackageInstaller {

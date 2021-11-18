@@ -18,13 +18,15 @@ export default class Settings {
   public static gasDir = 'gas';
 
   public static nodePackages_dev = [
+    '@types/google-apps-script',
+    '@typescript-eslint/eslint-plugin',
     'eslint',
     'eslint-config-airbnb-typescript',
     'eslint-plugin-import',
-    '@typescript-eslint/eslint-plugin',
+    'typescript',
   ];
 
-  public static nodePackages_prod = ['@types/google-apps-script'];
+  public static nodePackages_prod = [];
 
   public static gasTypes = [
     'standalone',
