@@ -5,11 +5,13 @@
 import FileHandler from '../files';
 import Settings from '../../settings';
 import { ArgumentParser } from 'argparse';
-import { exit, stdin, stdout } from 'process';
+import { exit, stdin, stdout, cwd, chdir } from 'process';
 import { get as promptGet, start as promptStart } from 'prompt';
+import ClaspFacade from '../clasp_facades';
+import { join as joinPath } from 'path';
 
 interface ArgsInter {
-  type: string;
+  gasType: string;
   modules: string[];
   name: string;
   parentIdProd: string;
@@ -18,12 +20,22 @@ interface ArgsInter {
 
 export class CreateProject {
   private args: ArgsInter = {
-    type: '',
+    gasType: '',
     modules: [],
     name: '',
     parentIdProd: '',
     parentIdDev: '',
   };
+
+  private workDir: string = '';
+
+  private baseDir: string = '';
+
+  private appDir: string = '';
+
+  private prodDirTmp: string = '';
+
+  private devDirTmp: string = '';
 
   constructor(argParse: ArgumentParser) {
     this.run(argParse);
@@ -39,12 +51,7 @@ export class CreateProject {
   }
 
   private async run(argParse: ArgumentParser) {
-    argParse.add_argument('-m', '--modules', {
-      help: 'Choose some DragonScript modules',
-      type: 'str',
-      action: 'append',
-      choices: Settings.dsModules,
-    });
+    this.workDir = cwd();
 
     argParse.add_argument('-n', '--name', {
       help: 'Set project name',
@@ -52,10 +59,24 @@ export class CreateProject {
       action: 'store',
     });
 
+    argParse.add_argument('-t', '--type', {
+      help: 'Choose GAS type:',
+      type: 'str',
+      action: 'store',
+      choices: Settings.gasTypes,
+    });
+
     argParse.add_argument('-p', '--parentId', {
       help: 'Parent ID',
       type: 'str',
       action: 'store',
+    });
+
+    argParse.add_argument('-m', '--modules', {
+      help: 'Choose some DragonScript modules',
+      type: 'str',
+      action: 'append',
+      choices: Settings.dsModules,
     });
 
     this.args = argParse.parse_args();
@@ -65,15 +86,17 @@ export class CreateProject {
       await this.setProjectName();
     }
 
-    if (!this.args['modules']) {
-      this.args.modules = [];
-      await this.setModules();
-    }
-
     if (!this.args['parentIdProd']) {
       this.args.modules = [];
       await this.setParentId();
     }
+
+    if (!this.args['modules'] || this.args.modules.length < 1) {
+      this.args.modules = [];
+      await this.setModules();
+    }
+
+    this.directoryStructure();
   }
 
   /**
@@ -87,10 +110,6 @@ export class CreateProject {
   }
 
   private async setProjectName() {
-    const instructions = `Select a project name:`;
-
-    console.log(instructions);
-
     let { name } = await this.doQuestion([
       {
         name: 'name',
@@ -102,17 +121,27 @@ export class CreateProject {
     this.args.name = <string>name;
   }
 
-  private async setParentId() {
-    const instructions = 'Enter parent file ID:';
+  private async setGasType() {
+    let { gasType } = await this.doQuestion([
+      {
+        name: 'name',
+        message: 'Select GAS type',
+        required: true,
+      },
+    ]);
 
+    this.args.gasType = <string>gasType;
+  }
+
+  private async setParentId() {
     let { parentIdProd, parentIdDev } = await this.doQuestion([
       {
-        name: 'parentIdProd',
-        message: instructions,
+        name: 'parentIdProd (Optional)',
+        message: 'Enter parent file ID',
       },
       {
-        name: 'parentIdDev',
-        message: 'Enter parent file ID for develop:',
+        name: 'parentIdDev (Optional)',
+        message: 'Enter parent file ID for develop',
       },
     ]);
 
@@ -163,5 +192,45 @@ export class CreateProject {
     }
 
     console.log(`\nSelected DS Modules: ${this.args.modules.join(', ')}`);
+  }
+
+  /**
+   * Creates project directory structure.
+   */
+  private directoryStructure() {
+    const projectName = this.args.name.replace(RegExp(' ', 'g'), '_');
+
+    this.baseDir = joinPath(this.workDir, projectName);
+    FileHandler.createDir(this.baseDir);
+
+    this.appDir = joinPath(this.baseDir, 'app');
+    FileHandler.createDir(this.appDir);
+
+    this.prodDirTmp = joinPath(this.baseDir, `${projectName}_prod_tmp`);
+    FileHandler.createDir(this.prodDirTmp);
+
+    this.devDirTmp = joinPath(this.baseDir, `${projectName}_dev_tmp`);
+    FileHandler.createDir(this.devDirTmp);
+
+    const gasDir = joinPath(FileHandler.DragonManagerDir(), Settings.gasDir);
+
+    const gasFiles = FileHandler.listDir(gasDir);
+
+    gasFiles.forEach((file: string) => {
+      const src = joinPath(gasDir, file);
+      const dest = joinPath(this.baseDir, file);
+      FileHandler.copyFile(src, dest, true);
+    });
+  }
+
+  private createGASprojects() {
+    const args = {
+      parentId: '',
+      title: '',
+      type: '',
+    };
+
+    chdir(this.prodDirTmp);
+    ClaspFacade.create({});
   }
 }

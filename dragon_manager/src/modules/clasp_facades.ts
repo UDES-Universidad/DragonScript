@@ -14,14 +14,14 @@ interface CreateParams {
     | 'forms'
     | 'webapp'
     | 'api' /* Type of script. */;
-  rootDir: string /* Local directory */;
-  parentId: string /* A project parent Id */;
+  rootDir?: string /* Local directory */;
+  parentId?: string /* A project parent Id */;
 }
 
 /**
  * Create new project.
  */
-class ClaspFacade {
+export default class ClaspFacade {
   public static create(params: CreateParams) {
     let command = 'clasp create';
 

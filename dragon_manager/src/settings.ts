@@ -15,18 +15,7 @@ export default class Settings {
     'webapp',
   ];
 
-  public static gastDir = 'gas';
-
-  public static gasFiles = [
-    '.clasp.json',
-    '.claspignore',
-    '.eslintrc,js',
-    '.gitignore',
-    '.prettierrc.json',
-    'appsscript.json',
-    'init_node.bash',
-    'tsconfig.json',
-  ];
+  public static gasDir = 'gas';
 
   public static nodePackages_dev = [
     'eslint',
@@ -36,4 +25,14 @@ export default class Settings {
   ];
 
   public static nodePackages_prod = ['@types/google-apps-script'];
+
+  public static gasTypes = [
+    'standalone',
+    'docs',
+    'sheets',
+    'slides',
+    'forms',
+    'webapp',
+    'api',
+  ];
 }
