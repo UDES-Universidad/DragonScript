@@ -29,7 +29,7 @@ interface ArgsInter {
   parentIdDev: string;
 }
 
-export class CreateProject {
+export default class CreateProject {
   private args: ArgsInter = {
     gasType: 'standalone',
     modules: [],

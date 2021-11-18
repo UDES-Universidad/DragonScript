@@ -48,6 +48,16 @@ export default class ClaspFacade {
   public static pull() {}
 
   public static push(params: PushParams) {
-    let command = 'clasp push';
+    let command = 'clasp push ';
+
+    if (params.force) {
+      command += '--force ';
+    }
+
+    if (params.watch) {
+      command += '--watch';
+    }
+
+    execSync(command.trim(), { stdio: 'inherit' });
   }
 }

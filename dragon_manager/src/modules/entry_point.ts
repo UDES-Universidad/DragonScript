@@ -1,6 +1,7 @@
 import { ArgumentParser } from 'argparse';
 import { argv, cwd } from 'process';
-import { CreateProject } from './commands/create_project';
+import CreateProject from './commands/create_project';
+import PushProject from './commands/push_project';
 
 export class DragonStarter {
   private currentDir: string;
@@ -48,5 +49,7 @@ export class DragonStarter {
 
   private pull() {}
 
-  private push() {}
+  private push() {
+    PushProject.create(this.argParse);
+  }
 }
