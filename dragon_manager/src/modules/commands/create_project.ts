@@ -229,6 +229,10 @@ export class CreateProject {
    * Create Dev and Prod GAS projects.
    */
   private createGASprojects() {
+    const claspFile = joinPath(this.baseDir, '.clasp.json');
+
+    FileHandler.remove(claspFile);
+
     if (!fse.existsSync(this.prodDirTmp)) {
       throw new Error(`Directory ${this.prodDirTmp} not exists.`);
     }
@@ -254,14 +258,9 @@ export class CreateProject {
       joinPath(this.appDir, 'appsscript.json')
     );
 
-    const claspFile = joinPath(this.baseDir, '.clasp.json');
-
-    FileHandler.remove(claspFile);
-
     FileHandler.copyFile(joinPath(this.devDirTmp, '.clasp.json'), claspFile);
 
     const claspData = FileHandler.readJSON(claspFile);
-
     claspData['rootDir'] = this.appDir;
 
     FileHandler.writeJSON(claspFile, claspData);
