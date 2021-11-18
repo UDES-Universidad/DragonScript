@@ -11,8 +11,17 @@ import ClaspFacade from '../clasp_facades';
 import { join as joinPath, basename as basenamePath } from 'path';
 import * as fse from 'fs-extra';
 
+type gasTypes =
+  | 'standalone'
+  | 'docs'
+  | 'sheets'
+  | 'slides'
+  | 'forms'
+  | 'webapp'
+  | 'api';
+
 interface ArgsInter {
-  gasType: string;
+  gasType: gasTypes;
   modules: string[];
   name: string;
   parentIdProd: string;
@@ -21,7 +30,7 @@ interface ArgsInter {
 
 export class CreateProject {
   private args: ArgsInter = {
-    gasType: '',
+    gasType: 'standalone',
     modules: [],
     name: '',
     parentIdProd: '',
@@ -37,6 +46,8 @@ export class CreateProject {
   private prodDirTmp: string = '';
 
   private devDirTmp: string = '';
+
+  private dsModulesDir: string = '';
 
   constructor(argParse: ArgumentParser) {
     this.run(argParse);
@@ -88,7 +99,7 @@ export class CreateProject {
     }
 
     if (!this.args['gasType']) {
-      this.args.gasType = '';
+      this.args.gasType = 'standalone';
       await this.setGasType();
     }
 
@@ -104,6 +115,7 @@ export class CreateProject {
 
     this.directoryStructure();
     this.createGASprojects();
+    this.dsModulesHandler();
   }
 
   /**
@@ -129,17 +141,35 @@ export class CreateProject {
   }
 
   private async setGasType() {
-    console.log(`GAS types: ${Settings.gasTypes.join(', ').trim()}`);
+    console.log(
+      `GAS types: \n${Settings.gasTypes
+        .map((v, i) => `  ${i}. ${v}\n`)
+        .join('')}`
+    );
 
-    let { gasType } = await this.doQuestion([
-      {
-        name: 'gasType',
-        message: 'Select GAS type',
-        required: true,
-      },
-    ]);
+    while (true) {
+      let { gasType } = await this.doQuestion([
+        {
+          name: 'gasType',
+          message: 'Select GAS type',
+          required: true,
+        },
+      ]);
 
-    this.args.gasType = <string>gasType;
+      if (!gasType) {
+        console.log('Enter a GAS type.');
+      }
+
+      if (!Settings.gasTypes.map((v, i) => i).includes(Number(gasType))) {
+        console.log(`ERROR: ${gasType} is not a valid option.`);
+        continue;
+      }
+
+      if (gasType) {
+        this.args.gasType = <gasTypes>Settings.gasTypes[Number(gasType)];
+        break;
+      }
+    }
   }
 
   private async setParentId() {
@@ -221,6 +251,9 @@ export class CreateProject {
     this.devDirTmp = joinPath(this.baseDir, `${projectName}_dev_tmp`);
     FileHandler.createDir(this.devDirTmp);
 
+    this.dsModulesDir = joinPath(this.baseDir, 'ds_modules');
+    FileHandler.createDir(this.dsModulesDir);
+
     const gasDir = joinPath(FileHandler.DragonManagerDir(), Settings.gasDir);
 
     const gasFiles = FileHandler.listDir(gasDir);
@@ -236,40 +269,89 @@ export class CreateProject {
    * Create Dev and Prod GAS projects.
    */
   private createGASprojects() {
+    const dragonConfig = joinPath(this.baseDir, 'dragonscript.config.json');
+
+    const dragonConfigValues = FileHandler.readJSON(dragonConfig);
+
     const claspFile = joinPath(this.baseDir, '.clasp.json');
 
-    FileHandler.remove(claspFile);
+    // if (fse.existsSync(claspFile)) {
+    //   throw new Error('There is a GAS project already.');
+    //   return;
+    // }
+
+    if (fse.existsSync(joinPath(this.devDirTmp, '.clasp.json'))) {
+      FileHandler.remove(claspFile);
+    }
+
+    FileHandler.remove(joinPath(this.baseDir, 'appsscript.json'));
 
     if (!fse.existsSync(this.prodDirTmp)) {
       throw new Error(`Directory ${this.prodDirTmp} not exists.`);
     }
 
+    // Create Gas Projects
+
     chdir(this.prodDirTmp);
-    ClaspFacade.create({
-      title: `${basenamePath(this.baseDir)}_prod`,
-      type: this.args.gasType,
-      parentId: this.args.parentIdProd,
-      rootDir: '',
-    });
+    // ClaspFacade.create({
+    //   title: `${basenamePath(this.baseDir)}_prod`,
+    //   type: this.args.gasType,
+    //   parentId: this.args.parentIdProd,
+    //   rootDir: '',
+    // });
+
+    const prodClaspValues = FileHandler.readJSON(
+      joinPath(this.prodDirTmp, '.clasp.json')
+    );
+    dragonConfigValues['prod'] = prodClaspValues;
+    dragonConfigValues['prod']['rootDir'] = this.appDir;
 
     chdir(this.devDirTmp);
-    ClaspFacade.create({
-      title: `${basenamePath(this.baseDir)}_dev`,
-      type: this.args.gasType,
-      parentId: this.args.parentIdDev,
-      rootDir: '',
-    });
+    // ClaspFacade.create({
+    //   title: `${basenamePath(this.baseDir)}_dev`,
+    //   type: this.args.gasType,
+    //   parentId: this.args.parentIdDev,
+    //   rootDir: '',
+    // });
+
+    const devClaspValues = FileHandler.readJSON(
+      joinPath(this.devDirTmp, '.clasp.json')
+    );
+    dragonConfigValues['dev'] = devClaspValues;
+    dragonConfigValues['dev']['rootDir'] = this.appDir;
+
+    FileHandler.writeJSON(dragonConfig, dragonConfigValues);
 
     FileHandler.copyFile(
       joinPath(this.devDirTmp, 'appsscript.json'),
       joinPath(this.appDir, 'appsscript.json')
     );
 
-    FileHandler.copyFile(joinPath(this.devDirTmp, '.clasp.json'), claspFile);
+    FileHandler.writeJSON(claspFile, dragonConfigValues['dev']);
 
-    const claspData = FileHandler.readJSON(claspFile);
-    claspData['rootDir'] = this.appDir;
+    FileHandler.remove(this.prodDirTmp);
+    FileHandler.remove(this.devDirTmp);
+  }
 
-    FileHandler.writeJSON(claspFile, claspData);
+  private dsModulesHandler() {
+    const dsModules = joinPath(FileHandler.DragonManagerDir(), 'ds_modules');
+
+    FileHandler.createDir(this.dsModulesDir);
+
+    FileHandler.copyFile(joinPath(dsModules, 'Settings.ts'), this.appDir, true);
+
+    FileHandler.copyFile(
+      joinPath(dsModules, 'interfaces.ts'),
+      this.dsModulesDir,
+      true
+    );
+
+    for (const moduleName of this.args.modules) {
+      FileHandler.copyDir(
+        joinPath(dsModules, moduleName),
+        this.dsModulesDir,
+        true
+      );
+    }
   }
 }

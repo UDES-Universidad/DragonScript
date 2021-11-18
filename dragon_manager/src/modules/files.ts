@@ -115,7 +115,6 @@ export default class FileHandler {
   public static readJSON(fileName: string) {
     return fse.readJsonSync(fileName, {
       encoding: 'utf-8',
-      flag: 'string',
     });
   }
 
