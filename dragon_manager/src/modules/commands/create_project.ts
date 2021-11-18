@@ -21,12 +21,6 @@ interface ArgsInter {
 
 export class CreateProject {
   private args: ArgsInter = {
-<<<<<<< HEAD
-    type: '',
-    modules: [],
-    name: '',
-  };
-=======
     gasType: '',
     modules: [],
     name: '',
@@ -43,7 +37,6 @@ export class CreateProject {
   private prodDirTmp: string = '';
 
   private devDirTmp: string = '';
->>>>>>> f107809749f47659a54a321384291d2d6b342b55
 
   constructor(argParse: ArgumentParser) {
     this.run(argParse);
