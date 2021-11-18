@@ -12,10 +12,18 @@ interface ArgsInter {
   type: string;
   modules: string[];
   name: string;
+  parentIdProd: string;
+  parentIdDev: string;
 }
 
 export class CreateProject {
-  private args: ArgsInter;
+  private args: ArgsInter = {
+    type: '',
+    modules: [],
+    name: '',
+    parentIdProd: '',
+    parentIdDev: '',
+  };
 
   constructor(argParse: ArgumentParser) {
     this.run(argParse);
@@ -44,6 +52,12 @@ export class CreateProject {
       action: 'store',
     });
 
+    argParse.add_argument('-p', '--parentId', {
+      help: 'Parent ID',
+      type: 'str',
+      action: 'store',
+    });
+
     this.args = argParse.parse_args();
 
     if (!this.args['name']) {
@@ -54,6 +68,11 @@ export class CreateProject {
     if (!this.args['modules']) {
       this.args.modules = [];
       await this.setModules();
+    }
+
+    if (!this.args['parentIdProd']) {
+      this.args.modules = [];
+      await this.setParentId();
     }
   }
 
@@ -68,16 +87,37 @@ export class CreateProject {
   }
 
   private async setProjectName() {
-    let instructions = `Select a project name:`;
+    const instructions = `Select a project name:`;
+
+    console.log(instructions);
 
     let { name } = await this.doQuestion([
       {
         name: 'name',
         message: 'Project name',
+        required: true,
       },
     ]);
 
-    this.args.name = name;
+    this.args.name = <string>name;
+  }
+
+  private async setParentId() {
+    const instructions = 'Enter parent file ID:';
+
+    let { parentIdProd, parentIdDev } = await this.doQuestion([
+      {
+        name: 'parentIdProd',
+        message: instructions,
+      },
+      {
+        name: 'parentIdDev',
+        message: 'Enter parent file ID for develop:',
+      },
+    ]);
+
+    this.args.parentIdProd = <string>parentIdProd;
+    this.args.parentIdDev = <string>parentIdDev;
   }
 
   /**
