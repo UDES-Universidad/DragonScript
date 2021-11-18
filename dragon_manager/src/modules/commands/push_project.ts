@@ -1,8 +1,9 @@
 import ClaspFacade from '../clasp_facades';
 import { ArgumentParser } from 'argparse';
 import FileHandler from '../files';
-import { cwd } from 'process';
+import { cwd, exit } from 'process';
 import { join as joinPath } from 'path';
+import { existsSync } from 'fs-extra';
 
 interface argsInter {
   force: boolean;
@@ -26,11 +27,20 @@ export default class PushProject {
 
   constructor(argParse: ArgumentParser) {
     this.currentDir = cwd();
+    this.isGASdir();
     this.run(argParse);
   }
 
   public static create(argParse: ArgumentParser) {
     return new PushProject(argParse);
+  }
+
+  private isGASdir() {
+    const claspFile = joinPath(this.currentDir, '.clasp.json');
+    if (!existsSync(claspFile)) {
+      console.log('This directory not seems contains a DragonScript project.');
+      exit(1);
+    }
   }
 
   /**
@@ -56,7 +66,7 @@ export default class PushProject {
     argParse.add_argument('-d', '--dev', {
       action: 'store_true',
       default: true,
-      help: 'Push code to develop',
+      help: 'Push code to develop.',
     });
 
     const args = argParse.parse_args();
