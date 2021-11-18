@@ -8,7 +8,7 @@ import { ArgumentParser } from 'argparse';
 import { exit, stdin, stdout, cwd, chdir } from 'process';
 import { get as promptGet, start as promptStart } from 'prompt';
 import ClaspFacade from '../clasp_facades';
-import { join as joinPath } from 'path';
+import { join as joinPath, basename as basenamePath } from 'path';
 
 interface ArgsInter {
   gasType: string;
@@ -224,13 +224,30 @@ export class CreateProject {
   }
 
   private createGASprojects() {
-    const args = {
-      parentId: '',
-      title: '',
-      type: '',
-    };
-
     chdir(this.prodDirTmp);
-    ClaspFacade.create({});
+    ClaspFacade.create({
+      title: `basenamePath(this.baseDir)_prod`,
+      type: this.args.gasType,
+      parentId: this.args.parentIdProd,
+      rootDir: '',
+    });
+
+    chdir(this.devDirTmp);
+    ClaspFacade.create({
+      title: `basenamePath(this.baseDir)_prod`,
+      type: this.args.gasType,
+      parentId: this.args.parentIdProd,
+      rootDir: '',
+    });
+
+    FileHandler.copyFile(
+      joinPath(this.devDirTmp, 'appsscript.json'),
+      joinPath(this.appDir, 'appsscript.json')
+    );
+
+    FileHandler.copyFile(
+      joinPath(this.devDirTmp, '.clasp.json'),
+      joinPath(this.baseDir, '.clasp.json')
+    );
   }
 }

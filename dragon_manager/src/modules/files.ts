@@ -103,16 +103,15 @@ export default class FileHandler {
   }
 
   public static readJSON(fileName: string) {
-    const rawData = fse.readFileSync(fileName, {
-      flag: 'string',
+    return fse.readJsonSync(fileName, {
       encoding: 'utf-8',
+      flag: 'string',
     });
-    return JSON.parse(rawData);
   }
 
   public static writeJSON(fileName: string, data: { [keys: string]: any }) {
-    const strData = JSON.stringify(data);
-    fse.writeFileSync(fileName, strData);
-    return strData;
+    fse.writeJSONSync(fileName, data, {
+      spaces: 2,
+    });
   }
 }
