@@ -91,7 +91,12 @@ export class CreateProject {
       choices: Settings.dsModules,
     });
 
-    this.args = argParse.parse_args();
+    const argsParse = argParse.parse_args();
+
+    this.args['name'] = argsParse.name;
+    this.args['parentIdProd'] = argsParse.parentId;
+    this.args['gasType'] = argsParse.type;
+    this.args['modules'] = argsParse.modules ? argsParse.modules : [];
 
     if (!this.args['name']) {
       this.args.name = '';
@@ -104,12 +109,10 @@ export class CreateProject {
     }
 
     if (!this.args['parentIdProd']) {
-      this.args.modules = [];
       await this.setParentId();
     }
 
-    if (!this.args['modules'] || this.args.modules.length < 1) {
-      this.args.modules = [];
+    if (this.args.modules.length < 1) {
       await this.setModules();
     }
 
@@ -280,12 +283,6 @@ export class CreateProject {
     //   return;
     // }
 
-    if (fse.existsSync(joinPath(this.devDirTmp, '.clasp.json'))) {
-      FileHandler.remove(claspFile);
-    }
-
-    FileHandler.remove(joinPath(this.baseDir, 'appsscript.json'));
-
     if (!fse.existsSync(this.prodDirTmp)) {
       throw new Error(`Directory ${this.prodDirTmp} not exists.`);
     }
@@ -313,6 +310,8 @@ export class CreateProject {
     //   parentId: this.args.parentIdDev,
     //   rootDir: '',
     // });
+
+    chdir(this.baseDir);
 
     const devClaspValues = FileHandler.readJSON(
       joinPath(this.devDirTmp, '.clasp.json')
