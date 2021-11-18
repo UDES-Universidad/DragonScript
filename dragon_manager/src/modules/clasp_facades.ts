@@ -18,6 +18,11 @@ interface CreateParams {
   parentId?: string /* A project parent Id */;
 }
 
+interface PushParams {
+  force: boolean;
+  watch: boolean;
+}
+
 /**
  * Create new project.
  */
@@ -41,4 +46,8 @@ export default class ClaspFacade {
    *
    */
   public static pull() {}
+
+  public static push(params: PushParams) {
+    let command = 'clasp push';
+  }
 }

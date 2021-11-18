@@ -118,9 +118,9 @@ export class CreateProject {
     }
 
     await this.directoryStructure();
+    await this.installNodeModules();
     await this.createGASprojects();
     await this.dsModulesHandler();
-    await this.installNodeModules();
   }
 
   /**
@@ -310,7 +310,7 @@ export class CreateProject {
 
     if (fse.existsSync(this.devDirTmp)) {
       chdir(this.prodDirTmp);
-      console.log(200);
+
       ClaspFacade.create({
         title: `${basenamePath(this.baseDir)}_prod`,
         type: this.args.gasType,
@@ -327,6 +327,7 @@ export class CreateProject {
 
     if (fse.existsSync(this.devDirTmp)) {
       chdir(this.devDirTmp);
+
       ClaspFacade.create({
         title: `${basenamePath(this.baseDir)}_dev`,
         type: this.args.gasType,
@@ -339,16 +340,16 @@ export class CreateProject {
       );
       dragonConfigValues['dev'] = devClaspValues;
       dragonConfigValues['dev']['rootDir'] = this.appDir;
+
+      FileHandler.copyFile(
+        joinPath(this.devDirTmp, 'appsscript.json'),
+        joinPath(this.appDir, 'appsscript.json')
+      );
     }
 
     chdir(this.baseDir);
 
     FileHandler.writeJSON(dragonConfig, dragonConfigValues);
-
-    FileHandler.copyFile(
-      joinPath(this.devDirTmp, 'appsscript.json'),
-      joinPath(this.appDir, 'appsscript.json')
-    );
 
     FileHandler.writeJSON(claspFile, dragonConfigValues['dev']);
 
