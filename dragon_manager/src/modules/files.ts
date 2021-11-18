@@ -90,6 +90,16 @@ export default class FileHandler {
   }
 
   /**
+   * Remove file or directory
+   * @param src {string}
+   */
+  public static remove(src: string) {
+    if (fse.existsSync(src)) {
+      fse.removeSync(src);
+    }
+  }
+
+  /**
    *
    * @param dir {string} Target directory
    * @returns {string []}: Array of files.

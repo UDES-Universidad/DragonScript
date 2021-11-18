@@ -23,13 +23,13 @@ interface CreateParams {
  */
 export default class ClaspFacade {
   public static create(params: CreateParams) {
-    let command = 'clasp create';
+    let command = 'clasp create ';
 
     Object.entries(params).forEach((item: [string, string]) => {
-      if (item[1]) command += `--${item[0]} ${item[1]}`;
+      if (item[1]) command += `--${item[0]} ${item[1]} `;
     });
 
-    execSync(command, { stdio: 'inherit' });
+    execSync(command.trim(), { stdio: 'inherit' });
   }
 
   /**

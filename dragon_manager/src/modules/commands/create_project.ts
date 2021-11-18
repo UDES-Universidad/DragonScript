@@ -9,6 +9,7 @@ import { exit, stdin, stdout, cwd, chdir } from 'process';
 import { get as promptGet, start as promptStart } from 'prompt';
 import ClaspFacade from '../clasp_facades';
 import { join as joinPath, basename as basenamePath } from 'path';
+import * as fse from 'fs-extra';
 
 interface ArgsInter {
   gasType: string;
@@ -97,6 +98,7 @@ export class CreateProject {
     }
 
     this.directoryStructure();
+    this.createGASprojects();
   }
 
   /**
@@ -223,10 +225,17 @@ export class CreateProject {
     });
   }
 
+  /**
+   * Create Dev and Prod GAS projects.
+   */
   private createGASprojects() {
+    if (!fse.existsSync(this.prodDirTmp)) {
+      throw new Error(`Directory ${this.prodDirTmp} not exists.`);
+    }
+
     chdir(this.prodDirTmp);
     ClaspFacade.create({
-      title: `basenamePath(this.baseDir)_prod`,
+      title: `${basenamePath(this.baseDir)}_prod`,
       type: this.args.gasType,
       parentId: this.args.parentIdProd,
       rootDir: '',
@@ -234,7 +243,7 @@ export class CreateProject {
 
     chdir(this.devDirTmp);
     ClaspFacade.create({
-      title: `basenamePath(this.baseDir)_prod`,
+      title: `${basenamePath(this.baseDir)}_prod`,
       type: this.args.gasType,
       parentId: this.args.parentIdProd,
       rootDir: '',
@@ -245,9 +254,16 @@ export class CreateProject {
       joinPath(this.appDir, 'appsscript.json')
     );
 
-    FileHandler.copyFile(
-      joinPath(this.devDirTmp, '.clasp.json'),
-      joinPath(this.baseDir, '.clasp.json')
-    );
+    const claspFile = joinPath(this.baseDir, '.clasp.json');
+
+    FileHandler.remove(claspFile);
+
+    FileHandler.copyFile(joinPath(this.devDirTmp, '.clasp.json'), claspFile);
+
+    const claspData = FileHandler.readJSON(claspFile);
+
+    claspData['rootDir'] = this.appDir;
+
+    FileHandler.writeJSON(claspFile, claspData);
   }
 }
