@@ -1,4 +1,3 @@
-const { execSync } = require("child_process");
 const fs = require('fs-extra');
 const path = require('path');
 const AbstractArgument = require('./prototype');

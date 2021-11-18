@@ -5,6 +5,7 @@ function settings_() {
   return {
     bookUrl: '',
     sheetName: '',
+    // Options for Web App. 
     debug: '1',
     appName: 'UDES | Test Vocacional',
     urlDev: '',
@@ -13,6 +14,6 @@ function settings_() {
       'https://udes.edu.mx/wp-content/uploads/2020/06/favicon-3-150x150.png',
     // error404Template: '',
     // redirectTemplate: '',
-    componentPaths: ['testVocacional/src/components', 'testVocacional/src/'],
+    componentPaths: [] /* Array of paths. */,
   };
 }

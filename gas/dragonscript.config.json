@@ -1,0 +1,14 @@
+{
+  "debug": false,
+  "prod": {
+    "scriptId": "",
+    "parentId": "",
+    "rootDir": ""
+  },
+  "dev": {
+    "scriptId": "",
+    "parentId": "",
+    "rootDir": ""
+  },
+  "update_many": []
+}
