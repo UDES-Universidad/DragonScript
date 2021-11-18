@@ -87,6 +87,11 @@ export class CreateProject {
       await this.setProjectName();
     }
 
+    if (!this.args['gasType']) {
+      this.args.gasType = '';
+      await this.setGasType();
+    }
+
     if (!this.args['parentIdProd']) {
       this.args.modules = [];
       await this.setParentId();
@@ -124,9 +129,11 @@ export class CreateProject {
   }
 
   private async setGasType() {
+    console.log(`GAS types: ${Settings.gasTypes.join(', ').trim()}`);
+
     let { gasType } = await this.doQuestion([
       {
-        name: 'name',
+        name: 'gasType',
         message: 'Select GAS type',
         required: true,
       },
@@ -247,9 +254,9 @@ export class CreateProject {
 
     chdir(this.devDirTmp);
     ClaspFacade.create({
-      title: `${basenamePath(this.baseDir)}_prod`,
+      title: `${basenamePath(this.baseDir)}_dev`,
       type: this.args.gasType,
-      parentId: this.args.parentIdProd,
+      parentId: this.args.parentIdDev,
       rootDir: '',
     });
 

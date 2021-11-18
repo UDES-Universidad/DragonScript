@@ -24,7 +24,7 @@ interface CreateParams {
 export default class ClaspFacade {
   public static create(params: CreateParams) {
     let command = 'clasp create ';
-
+    console.log(params);
     Object.entries(params).forEach((item: [string, string]) => {
       if (item[1]) command += `--${item[0]} ${item[1]} `;
     });
